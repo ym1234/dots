@@ -69,7 +69,7 @@ alias py='python'
 
 alias o='a -e xdg-open'
 alias k="killall"
-alias less='less -rRFX'
+# alias less='less -rRFX'
 alias mount='sudo mount'
 alias umount='sudo umount'
 alias fuckingwindows="find . -type f -execdir dos2unix {} \;"

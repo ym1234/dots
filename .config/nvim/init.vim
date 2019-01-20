@@ -47,7 +47,6 @@ call plug#begin('~/.config/nvim/plugins/')
 	Plug 'junegunn/vim-slash'
 
 	Plug 'tpope/vim-eunuch'
-	Plug 'wesQ3/vim-windowswap'
 
 	Plug 'tommcdo/vim-exchange'
 	Plug 'vim-scripts/ProportionalResize'
@@ -76,7 +75,6 @@ call plug#end()
 colorscheme hybrid_reverse
 
 set cursorline nojoinspaces nostartofline breakindent notimeout nottimeout hidden autowrite autoread nowritebackup nobackup noswapfile undofile noshowmode noequalalways shiftwidth=4 noexpandtab tabstop=4 autoindent hlsearch incsearch smartcase ignorecase splitbelow splitright termguicolors lazyredraw
-:
 set pumheight=10 background=dark spelllang=en_us cino=l1 inccommand=nosplit updatetime=50 undolevels=10000 completeopt-=preview cmdheight=1 diffopt+=vertical tabpagemax=10 history=1000 undodir=~/.config/nvim/tmp/undo listchars=tab:▸\ ,trail:·,eol:¬,nbsp:_ grepprg=rg\ --vimgrep\ --color=never
 let mapleader = "\<Space>"
 
@@ -176,10 +174,6 @@ let b:exchange_indent = 1
 let g:windowswap_map_keys = 0
 let g:ProportionalResize_UpdateTime = 5
 
-" hi Sneak guibg=bg guifg=#cc6666
-" hi SneakScope guibg=bg guifg=#cc6666
-" hi SneakLabel guibg=bg guifg=#cc6666
-
 let g:fzf_layout = { 'up': '~20%' }
 let g:fzf_action = {
 			\ 'ctrl-t': 'tab split',
@@ -273,12 +267,8 @@ autocmd FileType conf,vim setlocal foldmethod=marker
 autocmd FileType sxhkdrc setlocal commentstring=#\ %s
 autocmd FileType man nnoremap <buffer> gd <C-]>
 
-" autocmd ColorScheme * hi Sneak guibg=bg guifg=#cc6666
-" autocmd ColorScheme * hi SneakScope guibg=bg guifg=#cc6666
-" autocmd ColorScheme * hi SneakLabel guibg=bg guifg=#cc6666
-
 autocmd FileType fzf setlocal nonumber norelativenumber
-autocmd WinEnter * call AutoQf()
+" autocmd WinEnter * call AutoQf()
 
 autocmd FocusLost * silent! wa
 autocmd FileType * call LC_maps()
@@ -290,13 +280,13 @@ autocmd BufNewFile,BufRead *.hs setlocal tabstop=8 expandtab softtabstop=2 shift
 " }}}
 " Functions/Commands {{{
 
-function! AutoQf()
-	if &filetype ==? "qf"
-		setlocal nonumber norelativenumber
-		" execute	"normal \<C-w>\<C-p>"
-		" execute "normal \<C-w>J\<C-w>="
-	endif
-endfunction
+" function! AutoQf()
+" 	if &filetype ==? "qf"
+" 		setlocal nonumber norelativenumber
+" 		" execute	"normal \<C-w>\<C-p>"
+" 		" execute "normal \<C-w>J\<C-w>="
+" 	endif
+" endfunction
 
 function! ToggleQf()
   for buffer in tabpagebuflist()
@@ -384,48 +374,6 @@ function! TrimWhitespace()
 	call setpos('.', cursorpos)
 endfunction
 
-
-function! Ag_handler(lines, with_column)
-  if len(a:lines) < 2
-    return
-  endif
-
-  let cmd = s:action_for(a:lines[0], 'e')
-  let list = map(filter(a:lines[1:], 'len(v:val)'), 'Ag_to_qf(v:val, a:with_column)')
-  if empty(list)
-    return
-  endif
-
-  let first = list[0]
-  try
-    call s:open(cmd, first.filename)
-    execute first.lnum
-    if a:with_column
-      execute 'normal!' first.col.'|'
-    endif
-    normal! zz
-  catch
-  endtry
-
-  call s:fill_quickfix(list)
-endfunction
-
-
-function! Ag_to_qf(line, with_column)
-  let parts = split(a:line, ':')
-  let text = join(parts[(a:with_column ? 3 : 2):], ':')
-  let dict = {'filename': &acd ? fnamemodify(parts[0], ':p') : parts[0], 'lnum': parts[1], 'text': text}
-  if a:with_column
-    let dict.col = parts[2]
-  endif
-  return dict
-endfunction
-
-" command! -bang -nargs=* Rg call fzf#vim#grep( "rg --no-ignore --line-number --no-heading --color=always --follow -g '!{tags,.git,.cache}' ".shellescape(<q-args>), 0,
-			" \ <bang>0 ?
-			" \ fzf#wrap('', {'options': '--delimiter : --nth 3.. --preview-window="down:90%"', 'sink*': Ag_handler}) :
-			" \ fzf#wrap('', {'options': '--delimiter : --nth 3.. ', 'sink*': Ag_handler}), <bang>0)
-
 command! -nargs=? -complete=dir Cd call Cd(<f-args>)
 function! Cd(...)
 	call fzf#run(fzf#wrap({'source': 'find -L '.(a:0 == 0 ? '.' : a:1).' -type d  | sed "s|^\./||"', 'sink': 'cd'}))
@@ -467,7 +415,7 @@ endfunction
 " Mappings/Abbreviations {{{
 
 " Fuck <C-w>
-" I don't like gh tbh
+" I don't like gh either tbh
 " Maybe change it back to C-{h,j,k,l}?
 nnoremap <silent>gh :WinMove 'h'<CR>
 nnoremap <silent>gj :WinMove 'j'<CR>
@@ -479,14 +427,9 @@ nnoremap <silent><C-k> :WinMove 'k'<CR>
 nnoremap <silent><C-l> :WinMove 'l'<CR>
 nnoremap <Leader>c <C-w><C-q>
 nnoremap <C-c> <C-w><C-q>
-" I never use this either lol
-nnoremap <silent><Leader>sw :call WindowSwap#EasyWindowSwap()<CR>
 
 nmap s ys
 nmap ss ySs
-" I don't really think I need this
-" nmap s <Plug>(choosewin)
-" let g:choosewin_overlay_enable = 1
 
 nnoremap <Leader>/  :Rg<CR>
 nnoremap <Leader>.  :FZF<CR>
@@ -501,7 +444,7 @@ nnoremap <Leader>oH :History<CR>
 nnoremap <silent><Leader>se :vsp $MYVIMRC<CR>
 nnoremap <silent><Leader>sv :source $MYVIMRC<CR>:noh<CR>
 
-" LOL I never use tabs, maybe remove these.
+" I never use tabs, maybe remove these.
 nnoremap <silent><Leader>tn :tabnew<CR>
 nnoremap <silent><Leader>tm :tabm<Space>
 nnoremap <silent><Leader>td :tabclose<CR>
@@ -564,10 +507,9 @@ inoremap jj <ESC>
 inoremap jk <ESC>
 
 " Not sure if i really want these
-nnoremap <C-o> <C-o>zz
-nnoremap <C-i> <C-i>zz
+" nnoremap <C-o> <C-o>zz
+" nnoremap <C-i> <C-i>zz
 
-" TODO(ym): better keybinds
 nnoremap <M-n> :cnext<CR>zz
 nnoremap <M-c> :call ToggleQf()<CR>
 nnoremap <M-p> :cprev<CR>zz
@@ -590,6 +532,4 @@ cnoremap <A-f> <S-Right>
 vnoremap s :s//g<Left><Left>
 nnoremap S :<C-r>=v:count == 0 ? "%" : ""<CR>s//g<Left><Left>
 
-" nnoremap <C-o> o<Esc>k
-" nnoremap <M-o> O<Esc>j
 " }}}

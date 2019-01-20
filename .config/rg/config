@@ -1,0 +1,14 @@
+--glob
+!{tags,.git,.cache}
+
+--color
+always
+
+--colors
+match:style:nobold
+
+--colors
+match:fg:blue
+
+--colors
+line:fg:blue
