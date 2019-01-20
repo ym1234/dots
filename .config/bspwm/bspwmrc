@@ -1,0 +1,29 @@
+#!/bin/bash
+bc="bspc config"
+br="bspc rule"
+$bc focused_border_color  \#A54242 &
+$bc presel_feedback_color \#A54242 &
+$bc border_width          2 &
+$bc window_gap            4 &
+
+$bc split_ratio           0.5 &
+$bc borderless_monocle    true &
+$bc gapless_monocle       true  &
+
+$bc external_rules_command ~/.config/bspwm/external_rules &
+bspc monitor -d I II III IV V VI VII VIII IX X &
+
+$br -a Zathura state=tiled &
+
+# hsetroot -solid \#282A2E &
+hsetroot -full Media/Wallpapers/8tyiq6f717kz.png &
+greenclip daemon &
+# pactl set-sink-volume 0 100% &
+amixer sset Master 100% &
+chromium & disown
+
+# xmodmap ~/.Xmodmap & disown
+# xcape -e "Hyper_L=Escape" & disown
+battery & disown
+{ while :; do mpc idle &> /dev/null; mpd_status &> /dev/null; done & } & disown
+# feh --no-fehbg --bg-fill /home/ym/Pictures/Wallpapers/current.png &

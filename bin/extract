@@ -1,0 +1,15 @@
+#!/bin/bash
+# modified from https://github.com/turquoise-hexagon/bin/blob/master/extract
+
+for var in "$@"; do
+	if [ -f "$var" ]; then
+		case $var in
+			*.tar.bz2|*.tar.gz|*.tar.xz|*.tar|*.tgz|*.xz) tar xvf "$1";;
+			*.gz)      gunzip  "$1";;
+			*.zip)     unzip   "$1";;
+			*) echo "'$var' cannot be extracted via extract"
+		esac
+	else
+		echo 'usage : extract [file]'
+	fi
+done

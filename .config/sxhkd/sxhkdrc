@@ -1,0 +1,103 @@
+{_,super +} Print
+	screenshot {_,area}
+
+alt + Print
+	record
+
+XF86Audio{Play,Prev,Next}
+	mpc {toggle,prev,next}
+
+XF86MonBrightness{Up,Down}
+	brightness {+,-}
+
+XF86Audio{LowerVolume,RaiseVolume,Mute}
+	vol {decrease,increase,toggle}
+
+alt + XF86Audio{LowerVolume,RaiseVolume}
+	mpc volume {-,+}1
+
+alt + XF86AudioMute
+	mpc toggleoutput 1
+
+super + Return
+	st
+
+super + alt + g
+	~/Projects/bspwm_layout/out.sh
+# TODO(ym): not sure whether to keep the chords the current way or add super + before them
+# Some of these cover the bindings below
+super + s; {t,b,v,m}
+	{dateandtime,battery_level,vol,mpd_status}
+
+# TODO(ym): Fix these
+# Or use rofi/dmenu/bmenu
+super + {r,z,minus}
+	fuzzy_win {run,pdf,clipboard}
+
+super + alt + r
+	pkill -USR1 -x sxhkd
+
+super + Escape
+	bspc quit
+
+super + {_,alt + }w
+	bspc node -{c,k}
+
+super + y
+	bspc node newest.marked.local -n newest.!automatic.local
+
+super + g
+	bspc node -s biggest
+
+super + m
+	bspc desktop -l next
+
+super + t
+    bspc node -t $(bspc query -N -n -n .tiled > /dev/null && echo floating || echo tiled)
+
+super + s; f
+	bspc node -t ~fullscreen
+
+super + s; {m,x,s,z}
+	bspc node -g {marked,locked,sticky,private}
+
+super + {_,alt} {h,j,k,l}
+	{bspwm_focus,bspwm_move}  {west,south,north,east}
+# move {-f,-s} {west,south,north,east}
+
+super + s; {p,a,comma,period}
+	bspc node -f @{parent,brother,first,second}
+
+super + {_,alt + }c
+	bspc node -f {next,prev}.local
+
+super + bracket{left,right}
+	bspc desktop -f {prev,next}.local
+
+alt + {grave,Tab}
+	bspc {node,desktop} -f last
+
+super + {p,n}
+	bspc wm -h off; \
+	bspc node {older,newer} -f; \
+	bspc wm -h on
+
+super + {_,alt + }{1-9,0}
+	bspc {desktop -f,node -d} '^{1-9,10}'
+
+# preselect
+super + s; {h,j,k,l}
+	bspc node -p {west,south,north,east}
+
+super + s; c
+	bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel
+
+super + s; {1-9}
+	bspc node -o 0.{1-9}
+
+super + s; r: {h,j,k,l}
+	bspwm_resize {west,south,north,east}
+
+super + {Left,Down,Up,Right}
+	bspc node -v {-20 0,0 20,0 -20,20 0}
+

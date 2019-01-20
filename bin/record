@@ -1,0 +1,31 @@
+#!/bin/bash
+#
+# modified from http://github.com/mitchweaver/bin
+# Records a selected rectangle with ffmpeg.
+#
+
+TMPDIR="${TMPDIR:-/tmp}"
+pid="$(cat $TMPDIR/record 2> /dev/null)"
+isalive="$(ps -p $pid -o comm= 2> /dev/null)"
+[[ "$isalive" = "ffmpeg" ]] && {
+	kill -SIGINT "$pid"
+	rm "$TMPDIR/record"
+	name="$(< '/tmp/record_name')"
+	rm "$TMPDIR/record_name"
+
+	# wait for ffmpeg to finish writing the file and exiting
+	sleep 0.5
+
+	curl -sF"file=@$name" https://0x0.st | xclip -selection clipboard -in
+	notify-send -a "Recording" "$(xclip -selection clipboard -out)"
+} || {
+	slop=$(slop -q -f '%x %y %w %h')
+	[[ $slop == "" ]] && exit 1
+
+	set $slop
+	name="$HOME/Drive/Media/Recordings/record-$(date +'%F:%R:%S').mp4"
+	ffmpeg -y -f x11grab -s ${3}x${4} -r 30 -i :0.0+${1},${2} -qscale 0 "$name" > /dev/null 2>&1 & disown
+	echo $! > $TMPDIR/record
+	echo "$name" > $TMPDIR/record_name
+}
+

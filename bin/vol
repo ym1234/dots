@@ -1,0 +1,11 @@
+#!/bin/bash
+# Some stuff stolen from mitch
+case $1 in
+	increase) amixer sset Master 1%+ ;;
+	decrease) amixer sset Master 1%- ;;
+	toggle) amixer sset Master toggle ;;
+esac
+
+$(amixer sget Master | grep -o '\[off\]' > /dev/null) && muted='Muted' || muted='Unmuted'
+vol="$(amixer sget Master | grep 'Left:' | awk -F'[][]' '{ print $2 }')"
+dunstify -r 101 -a "Current volume:" "$vol [$muted]"

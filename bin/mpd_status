@@ -1,0 +1,30 @@
+#!/bin/bash
+app_name="MPD"
+
+! [ "$(mpc current)" ] && app_name="$app_name [Stopped]"  || {
+	app_name="$app_name ["
+	mpc status | grep -q paused && app_name="${app_name}Paused" || app_name="${app_name}Playing"
+
+	mpc_status="$(mpc status | grep vol | sed -e "s/:/:\ /g" )"
+    [ "$(mpc crossfade | awk '{print $2}')" -gt 0 ] && fade="x"
+    [ "$(echo $mpc_status | awk '{print $4}')" = "on" ] && re="r"
+    [ "$(echo $mpc_status | awk '{print $6}')" = "on" ] && ran="z"
+    [ "$(echo $mpc_status | awk '{print $8}')" = "on" ] && sin="s"
+    [ "$(echo $mpc_status | awk '{print $10}')" = "on" ] && cons="c"
+
+	# app_name="$app_name [$(mpc listall | wc -l)]"
+	app_name="$app_name | $(mpc | awk NR==2'{print $3}')"
+	app_name="$app_name | $(echo $mpc_status | awk '{print $2}')"
+	modes="${re}${ran}${sin}${fade}${cons}"
+	[ "$modes" == "" ] || app_name="$app_name | $modes"
+	app_name="$app_name | $(mpc status | awk 'NR==2 {print substr($2,2)}' )"
+	app_name="$app_name]"
+	body="$(mpc current)"
+}
+
+command -v dunstify && dunstify -a "$app_name" -r 238401 "$body" || {
+	command -v notify-send && notify-send -a "$app_name" "$body" || {
+		echo "dunstify/notify-send not found"
+		exit 1
+	}
+}

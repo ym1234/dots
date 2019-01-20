@@ -1,0 +1,73 @@
+#!/bin/sh
+#
+# Modified From Marin'a scripts!
+# move windows
+
+dir=$1
+
+node=$(bspc query -N -n)
+
+case $dir in
+    west)  fdim=width;  tdim=height; sign=-;;
+    east)  fdim=width;  tdim=height; sign=+;;
+    north) fdim=height; tdim=width;  sign=-;;
+    south) fdim=height; tdim=width;  sign=+
+esac
+
+# move floating windows
+floating ()
+{
+    percent=3
+
+    # get a percentage of the monitor resolution
+	var=$(bspc query -T -m | jq .rectangle."$fdim")
+	var=$(($var * percent / 100))
+	current="$(bspc query -T -n focused)"
+
+    [ "$fdim" = width  ] && { x=$sign$var; y=0; }
+    [ "$fdim" = height ] && { y=$sign$var; x=0; }
+	next_x=$(`echo "$current" | jv .rectangle.x` + `echo "$current" | jv .rectangle.width` + $x)
+	next_y=$(`echo "$current" | jv .rectangle.y` + `echo "$current" | jv .rectangle.height` + $y)
+
+    bspc node -v "$x" "$y"
+}
+
+# move tiled windows
+tiled ()
+{
+    # attempt to replace a preselection or to move a window
+    { bspc node -n "$dir.!automatic" || bspc node -s "$dir"; } && return
+
+    while parent=$(bspc query -N -n "$node#@parent"); test "$parent"; do
+
+        nod_dim=$(bspc query -T -n "$node"   | jq ".rectangle.$tdim")
+        par_dim=$(bspc query -T -n "$parent" | jq ".rectangle.$tdim")
+
+        if [ "$par_dim" -gt "$nod_dim" ]; then
+            # create a receptacle
+            # get the receptacle id
+            # replace the receptacle
+
+            bspc node "$parent" -p "$dir" -i
+
+            recept=$(bspc query -N "$parent#@parent" -n .descendant_of.leaf.!window)
+
+            bspc node "$node" -n "$recept"
+            bspc node "$parent" -B
+
+            return
+        fi
+
+        node=$parent
+    done
+}
+
+
+if bspc query -N -n focused.floating > /dev/null; then
+    floating
+else
+    # teleport pointer on the focused window
+    bspc config pointer_follows_focus true
+    tiled
+    bspc config pointer_follows_focus false
+fi

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# TODO(ym): traverse the hierarchy and spawn the terminals with their children/write a better comment
+
+layout="$(bspc wm -d)"
+canvas="$(extract_canvas <(echo $layout))"
+rules="$(induce_rules <(echo $layout))"
+windows="$(echo "$layout" | jq -r '.. | .? | select (.client.state != null) | .id')"
+
+for i in $windows; do
+	pid=$(xprop -id $i | grep "_NET_WM_PID(CARDINAL)")
+	pid=${pid#*"= "}
+	working_directory=$(readlink -e /proc/"$pid"/cwd)
+	if [[ $last_working_directory != $working_directory ]]; then
+		[ -z "$last_working_directory" ] || commandline+='popd'$'\n'
+		commandline+="pushd $working_directory"$'\n'
+	fi
+	commandline+="$(tr '\000' ' ' < /proc/"$pid"/cmdline)&"$'\n'
+	last_working_directory=$working_directory
+done
+commandline+='disown -a'
+
+script='tmp=$(mktemp)'$'\n'
+script+="echo '"$canvas"' > \$tmp"$'\n'
+script+="bspc wm -l \$tmp"$'\n'
+script+="$rules"$'\n'
+script+="$commandline"$'\n'
+script+='rm $tmp'
+
+echo "$script"

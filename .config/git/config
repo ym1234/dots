@@ -1,0 +1,14 @@
+[user]
+	email = mohamed.yoyo100@gmail.com
+	name = ym555
+
+[github]
+	user = ym1234
+
+[pager]
+	; diff = diff-so-fancy | less -RFX
+	; show = diff-so-fancy | less -RFX
+
+[color]
+	ui = true
+

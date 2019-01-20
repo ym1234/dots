@@ -1,0 +1,10 @@
+#!/bin/bash
+name="$HOME/Media/Screenshots/$(date +'%F:%R:%S').png"
+case $1 in
+	area)
+		shotgun -g "$(slop)" "$name" ;;
+	*)
+		shotgun "$name" ;;
+esac
+curl -sF"file=@$name" https://0x0.st | xclip -selection clipboard -in
+notify-send -a "Screenshot" "$(xclip -selection clipboard -out)"

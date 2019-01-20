@@ -1,0 +1,48 @@
+set selection-clipboard clipboard
+set recolor true
+
+set window-title-basename true
+set statusbar-basename true
+
+set smooth-scroll true
+set highlight-transparency 0.3
+
+set adjust-open "width"
+set font "curie normal 8"
+
+map d scroll half-down
+map u scroll half-up
+
+set recolor-lightcolor "#1D1F21"
+set recolor-darkcolor "#C5C8C6"
+
+map i recolor
+
+set inputbar-bg "#1D1F21"
+set inputbar-fg "#C5C8C6"
+
+set statusbar-bg "#1D1F21"
+set statusbar-fg "#C5C8C6"
+
+set default-bg "#1D1F21"
+set default-fg "#C5C8C6"
+
+set index-bg "#1D1F21"
+set index-fg "#C5C8C6"
+
+set index-active-bg "#A54242"
+set index-active-fg "#C5C8C6"
+
+set completion-bg "#1D1F21"
+set completion-fg "#C5C8C6"
+
+set completion-highlight-bg "#A54242"
+set completion-highlight-fg "#C5C8C6"
+
+set completion-group-bg "#A54242"
+set completion-group-fg "#C5C8C6"
+
+set highlight-color "#A54242"
+set highlight-active-color "#5F819D"
+
+set notification-bg "#A54242"

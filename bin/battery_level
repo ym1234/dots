@@ -1,0 +1,6 @@
+#!/bin/bash
+urgency="${1:-normal}"
+acpi -b | awk -F'[,:%]' '{print $2, $3}' | {
+	read -r status capacity
+	dunstify -r 200 -u $urgency -a "Battery" "$capacity% [$status]"
+}

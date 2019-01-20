@@ -1,0 +1,9 @@
+#!/bin/bash
+max="$(< /sys/class/backlight/intel_backlight/max_brightness)"
+current="$(< /sys/class/backlight/intel_backlight/brightness)"
+var=$((current ${1:-+} max * ${2:-1} / 100))
+
+[[ "$var" -le "$max" && "$var" -ge 0  ]] && {
+	echo $var > /sys/class/backlight/intel_backlight/brightness
+	dunstify -r 100 -a "Current brightness:" $(printf "scale=2; $var / $max * 100\n" | bc -l)
+}

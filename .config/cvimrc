@@ -1,0 +1,21 @@
+set noautofocus
+set completeonopen
+set showtabindices
+set sortlinkhints
+let searchlimit = 20
+let typelinkhintsdelay = 0
+let hintcharacters = "aoeuidhtnscrg"
+map b :buffer<Space>
+map B :bookmarks<Space>
+map cc lastUsedTab
+map - :
+map s %
+unmap <C-6>
+map ; :restore<Space>
+getIP() -> {{
+httpRequest({url: 'http://api.ipify.org/?format=json', json: true},
+            function(res) { Status.setMessage('IP: ' + res.ip); });
+}}
+map mi fullImageHint
+let nextmatchpattern = "((?!first)(next|older|more|>|›|»|forward| )+).*"
+let previousmatchpattern = ".*((?!last)(prev(ious)?|newer|back|«|less|<|‹| )+)"
