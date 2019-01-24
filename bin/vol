@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Some stuff stolen from mitch
 case $1 in
 	increase) amixer sset Master 1%+ ;;

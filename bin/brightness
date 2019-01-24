@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 max="$(< /sys/class/backlight/intel_backlight/max_brightness)"
 current="$(< /sys/class/backlight/intel_backlight/brightness)"
 var=$((current ${1:-+} max * ${2:-1} / 100))

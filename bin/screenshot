@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 name="$HOME/Media/Screenshots/$(date +'%F:%R:%S').png"
 case $1 in
 	area)

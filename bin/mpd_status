@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 app_name="MPD"
 
 ! [ "$(mpc current)" ] && app_name="$app_name [Stopped]"  || {

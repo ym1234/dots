@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 bc="bspc config"
 br="bspc rule"
 $bc focused_border_color  \#A54242 &
@@ -22,8 +22,8 @@ greenclip daemon &
 amixer sset Master 100% &
 chromium & disown
 
-# xmodmap ~/.Xmodmap & disown
-# xcape -e "Hyper_L=Escape" & disown
+xmodmap ~/.Xmodmap &
+
 battery & disown
 { while :; do mpc idle &> /dev/null; mpd_status &> /dev/null; done & } & disown
 # feh --no-fehbg --bg-fill /home/ym/Pictures/Wallpapers/current.png &

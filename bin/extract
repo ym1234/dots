@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # modified from https://github.com/turquoise-hexagon/bin/blob/master/extract
 
 for var in "$@"; do

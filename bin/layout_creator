@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # TODO(ym): traverse the hierarchy and spawn the terminals with their children/write a better comment
 

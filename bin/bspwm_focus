@@ -1,72 +1,46 @@
-#!/bin/mksh
+#!/bin/sh
 #
-# focus windows with bspwm
+# focus windows
 
 # exit when fullscreen
 bspc query -N -n focused.fullscreen > /dev/null && exit
 
+windows () {
+	case $1 in
+		focused) bspc query -N -n .local.focused.\!fullscreen;;
+		normal)  bspc query -N -n .local.\!focused.\!fullscreen
+	esac
+}
+
 case $1 in
-    east)  dir=x; sign=-gt;;
-    west)  dir=x; sign=-lt;;
-    north) dir=y; sign=-lt;;
-    south) dir=y; sign=-gt
+    east)  dim=xy; sign='<'; op=-gt;;
+    west)  dim=xy; sign='>'; op=-lt;;
+    north) dim=yx; sign='>'; op=-lt;;
+    south) dim=yx; sign='<'; op=-gt
 esac
 
 # get values for the current window
-bspc query -T -n | jq -r '
-    if .client.state == "floating" then
-        [
-            .client.floatingRectangle.x,
-            .client.floatingRectangle.y
-        ]
-    else
-        [
-            .client.tiledRectangle.x,
-            .client.tiledRectangle.y
-        ]
-    end | @sh' |
+wattr "$dim" $(windows focused) |
 {
-    read -r cur_x cur_y
+    read -r cur_1 cur_2
 
-    # get values for all windows on the current desktop
-    bspc query -T -d | jq -r '
-        .. | .? | select (.client.state != null) |
+    # get values for all other windows
+    wattr "i$dim" $(windows normal) |
+    {
+        # sort windows
+        while read -r win win_1 win_2; do
+            [ "$win_1" "$op" "$cur_1" ] &&
+                case $((min_1 ? win_1 $sign min_1 ? 0 : win_1 == min_1 && win_2 $sign min_2 ? 1 : 2 : 3)) in
+                    0|1|3) min_1=$win_1; min_2=$win_2; focus=$win
+                esac
+        done
 
-        if .client.state == "floating" then
-            [
-                .client.floatingRectangle.x,
-                .client.floatingRectangle.y,
-                .id
-            ]
-        else
-            [
-                .client.tiledRectangle.x,
-                .client.tiledRectangle.y,
-                .id
-            ]
-        end | @sh' |
-            # parse directions
-            while read -r win_x win_y win; do
-                diff_x=$((win_x - cur_x)); diff_x=${diff_x#-}
-                diff_y=$((win_y - cur_y)); diff_y=${diff_y#-}
+        # exit if there is no window to focus
+        test "$focus" || exit
 
-                [ "$dir" = x ] && [ "$win_x" "$sign" "$cur_x" ] && echo "$diff_x $diff_y $win"
-                [ "$dir" = y ] && [ "$win_y" "$sign" "$cur_y" ] && echo "$diff_y $diff_x $win"
-            done |
-            {
-                # sort windows
-                while read -r col_1 col_2 col_3; do
-                    case $((min_1 ? col_1 < min_1 ? 0 : col_1 == min_1 && col_2 < min_2 ? 1 : 2 : 3)) in
-                         0|1|3) min_1=$col_1; min_2=$col_2; focus=$col_3
-                    esac
-                done
-
-                # exit if there is no window to focus
-                test "$focus" || exit
-
-                # teleport pointer on the focused window
-                bspc config pointer_follows_focus true
-                bspc node "$focus" -f
-                bspc config pointer_follows_focus false
-            }
+        # teleport cursor on the focused window
+        bspc config pointer_follows_focus true
+        bspc node "$focus" -f
+        bspc config pointer_follows_focus false
+    }
 }

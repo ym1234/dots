@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 func () {
 	greenclip print | fzf --inline-info --reverse | xclip -in -selection clipboard
 	xdotool getactivewindow windowunmap

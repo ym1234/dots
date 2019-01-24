@@ -1,18 +1,16 @@
-#!/bin/bash
-while : ; do
-	acpi -b | awk -F'[,:%]' '{print $2, $3}' | {
-		read -r status capacity
+#!/bin/sh
+while :; do
+	. /sys/class/power_supply/BAT0/device/power_supply/BAT0/uevent
+	[[ "$POWER_SUPPLY_STATUS" == "Discharging" ]] && {
+		[[ "$POWER_SUPPLY_CAPACITY" -lt 5 ]] && {
+		dunstify -r 220 -u critical -a "Status: Discharging ($POWER_SUPPLY_CAPACITY%)" "suspending in 5 seconds."
 
-		[[ "$status" == "Discharging" ]] && {
-			[[ "$capacity" -lt 5 ]] && {
-				dunstify -r 220 -u critical -a "Battery" "$capacity%, suspending in 5 seconds."
-				sleep 5
-				systemctl suspend
-			}
-			[[ "$capacity" -lt 15 ]] && [[ "$capacity" -gt 5 ]] &&  battery_level critical
-		} || {
-			[[ "$status" == "Full" ]] && battery_level
+			sleep 5
+			systemctl suspend
 		}
+		[[ "$POWER_SUPPLY_CAPACITY" -lt 15 ]] && [[ "$POWER_SUPPLY_CAPACITY" -gt 5 ]] &&  battery_level critical
+	} || {
+		[[ "$POWER_SUPPLY_STATUS" == "Full" ]] && battery_level
 	}
 	sleep 1m
 done

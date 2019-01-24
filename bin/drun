@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 format_xdg_data_dirs() {
     printf "%s" "$XDG_DATA_DIRS" | xargs -d : -I'{}' printf "%s/applications/\\n" "{}"
 }

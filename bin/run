@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 posix_list_commands() {
 	COMMANDS=$(printf "%s" "$PATH" | xargs -d : -I {} find {} -maxdepth 1 \
 		-executable -type f -printf '%P\n' 2> /dev/null)
 	printf "%s\\n" "$COMMANDS" | sort -u
 }
 
-bash_list_commands() {
+sh_list_commands() {
 	compgen -c
 }
 
@@ -15,10 +15,10 @@ zsh_list_commands() {
 }
 
 run () {
-	# Checking BASH_VERSION and ZSH_VERSION isn't fool-proof since
+	# Checking sh_VERSION and ZSH_VERSION isn't fool-proof since
 	# some smart-ass might set it in the environment. For "mugh speed"
 	# it's probably good enough though.
-	[ -n "$BASH_VERSION" ] && func="bash_list_commands"
+	[ -n "$sh_VERSION" ] && func="bash_list_commands"
 	[ -n "$ZSH_VERSION"  ] && func="zsh_list_commands"
 	[ -z "$func" ] && func="posix_list_commands"
 

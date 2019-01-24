@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 func () {
 	find ~/Books/ -type f -iname '*.pdf' | fzf --inline-info --reverse --multi --preview 'pdftotext -l 5 {} -' | while read -r book
 	do

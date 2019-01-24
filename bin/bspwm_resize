@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 #
 # easier resizing with bspwm
 # Stolen from marin/turquoise
