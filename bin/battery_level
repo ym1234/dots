@@ -2,6 +2,6 @@
 urgency="${1:-normal}"
 . /sys/class/power_supply/BAT0/uevent
 
-[[ $POWER_SUPPLY_STATUS == "Discharging" ]] || [[ $POWER_SUPPLY_STATUS == "Full" ]] && stat="Time remaining: $((POWER_SUPPLY_CHARGE_NOW/(-POWER_SUPPLY_CURRENT_NOW))) hours";
+[[ $POWER_SUPPLY_STATUS =~ (Discharging|Full) ]] && stat="Time remaining: $((POWER_SUPPLY_CHARGE_NOW/(-POWER_SUPPLY_CURRENT_NOW))) hours";
 [[ $POWER_SUPPLY_STATUS == "Charging" ]] && stat="Fully charged in: $(((POWER_SUPPLY_CHARGE_FULL - POWER_SUPPLY_CHARGE_NOW) / POWER_SUPPLY_CURRENT_NOW)) hour(s)"
 dunstify -r 200 -u $urgency -a "Status: $POWER_SUPPLY_STATUS ($POWER_SUPPLY_CAPACITY%)" "$stat"

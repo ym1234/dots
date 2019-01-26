@@ -1,9 +1,10 @@
 #!/bin/sh
+# TODO(ym): POSIXify your shell scripts
 while :; do
 	. /sys/class/power_supply/BAT0/device/power_supply/BAT0/uevent
 	[[ "$POWER_SUPPLY_STATUS" == "Discharging" ]] && {
 		[[ "$POWER_SUPPLY_CAPACITY" -lt 5 ]] && {
-		dunstify -r 220 -u critical -a "Status: Discharging ($POWER_SUPPLY_CAPACITY%)" "suspending in 5 seconds."
+			dunstify -r 220 -u critical -a "Status: Discharging ($POWER_SUPPLY_CAPACITY%)" "suspending in 5 seconds."
 
 			sleep 5
 			systemctl suspend
