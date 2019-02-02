@@ -9,64 +9,63 @@ if empty(glob('~/.config/nvim/plugins/'))
 endif
 
 " Plugins {{{
-
 " NOTE: Indented for easier management with vim-textobj-indent
 call plug#begin('~/.config/nvim/plugins/')
-	Plug 'kristijanhusak/vim-hybrid-material'
+    Plug 'kristijanhusak/vim-hybrid-material'
+    Plug 'wlangstroth/vim-racket'
 	" Idk if i really need it
-	Plug 'tpope/vim-fugitive'
+    Plug 'tpope/vim-fugitive'
 
-	Plug 'airblade/vim-rooter'
-	Plug 'chrisbra/Colorizer'
+    Plug 'airblade/vim-rooter'
+    Plug 'chrisbra/Colorizer'
 
-	Plug 'itchyny/lightline.vim'
 
-	Plug $GOPATH . '/src/github.com/junegunn/fzf'
-	Plug 'junegunn/fzf.vim'
+    Plug 'itchyny/lightline.vim'
+    Plug $GOPATH . '/src/github.com/junegunn/fzf'
 
-	Plug 'tpope/vim-commentary'
-	Plug 'tpope/vim-surround'
+    Plug 'junegunn/fzf.vim'
+    Plug 'junegunn/vim-easy-align'
 
-	Plug 'tpope/vim-repeat'
+    Plug 'tpope/vim-commentary'
+    Plug 'tpope/vim-surround'
 
-	Plug 'kana/vim-textobj-user'
-	Plug 'kana/vim-textobj-indent'
 
-	Plug 'kana/vim-textobj-function'
-	" TODO(ym): I rarely use folds
-	Plug 'kana/vim-textobj-fold'
+    Plug 'tpope/vim-repeat'
+    Plug 'kana/vim-textobj-user'
 
-	Plug 'sgur/vim-textobj-parameter'
-	Plug 'Julian/vim-textobj-variable-segment'
+    Plug 'kana/vim-textobj-indent'
+    Plug 'kana/vim-textobj-function'
 
-	" TODO(ym): I don't really use this, either? i mostly just use gc provided by commentary
-	Plug 'glts/vim-textobj-comment'
-	Plug 'tpope/vim-endwise'
+    Plug 'sgur/vim-textobj-parameter'
+    Plug 'Julian/vim-textobj-variable-segment'
 
-	Plug 'ym1234/vim-fswitch', { 'for': [ 'c', 'cpp' ] }
-	Plug 'junegunn/vim-slash'
+	" TODO(ym): I don't really use this, either? I mostly just use gc provided by commentary
+    Plug 'glts/vim-textobj-comment'
+    Plug 'tpope/vim-endwise'
 
-	Plug 'tpope/vim-eunuch'
+    Plug 'ym1234/vim-fswitch', { 'for': [ 'c', 'cpp' ] }
+    Plug 'junegunn/vim-slash'
 
-	Plug 'tommcdo/vim-exchange'
-	Plug 'vim-scripts/ProportionalResize'
+    Plug 'tpope/vim-eunuch'
+
+    Plug 'tommcdo/vim-exchange'
+    Plug 'vim-scripts/ProportionalResize'
 
 	" Plug '~/Drive/Projects/lldb.nvim', { 'for': [ 'c', 'cpp', 'go', 'rust' ], 'do': ':UpdateRemotePlugins' }
 	" TODO(ym): KEYBINDS
 	" TODO(ym): and port from lldb to gdb
-	Plug 'dbgx/lldb.nvim', { 'for': [ 'c', 'cpp', 'go', 'rust' ], 'do': ':UpdateRemotePlugins' }
+    Plug 'dbgx/lldb.nvim', { 'for': [ 'c', 'cpp', 'go', 'rust' ], 'do': ':UpdateRemotePlugins' }
 
-	Plug 'vim-scripts/ReplaceWithRegister'
-	Plug 'drmingdrmer/vim-indent-lua'
+    Plug 'vim-scripts/ReplaceWithRegister'
+    Plug 'drmingdrmer/vim-indent-lua'
 
-	Plug 'machakann/vim-highlightedyank'
+    Plug 'machakann/vim-highlightedyank'
 
-	Plug 'lambdalisue/suda.vim'
-	Plug 'mbbill/undotree'
+    Plug 'lambdalisue/suda.vim'
+    Plug 'mbbill/undotree'
 
-	Plug 'sheerun/vim-polyglot'
-	Plug 'autozimu/LanguageClient-neovim', {  'branch': 'next',  'do': './install.sh' }
-	" Plug 'natebosch/vim-lsc'
+    Plug 'sheerun/vim-polyglot'
+    Plug 'autozimu/LanguageClient-neovim', {  'branch': 'next',  'do': './install.sh' }
 call plug#end()
 
 " }}}
@@ -260,6 +259,9 @@ let g:lightline#colorscheme#hybridmodified#palette = lightline#colorscheme#fill(
 
 autocmd BufWritePre * call TrimWhitespace()
 autocmd BufRead *.h setlocal filetype=c
+
+autocmd Filetype *.rkt setlocal expandtab
+autocmd Filetype *.rkt inoremap lambda λ
 
 autocmd BufRead .bashrc setlocal foldmethod=marker
 autocmd FileType conf,vim setlocal foldmethod=marker
@@ -531,5 +533,13 @@ cnoremap <A-f> <S-Right>
 
 vnoremap s :s//g<Left><Left>
 nnoremap S :<C-r>=v:count == 0 ? "%" : ""<CR>s//g<Left><Left>
+
+" Is ga good? its default behaviour was pretty nice tbh but i didn't use it
+" often
+xmap ga <Plug>(EasyAlign)
+nmap ga <Plug>(EasyAlign)
+
+nnoremap <Leader>ae mavap:EasyAlign =<CR>`a
+nnoremap <Leader>at mavap:EasyAlign *\|<CR>`a
 
 " }}}

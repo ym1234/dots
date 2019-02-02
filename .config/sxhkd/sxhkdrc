@@ -24,7 +24,7 @@ super + Return
 
 super + alt + g
 	~/Projects/bspwm_layout/out.sh
-# TODO(ym): not sure whether to keep the chords the current way or add super + before them
+
 # Some of these cover the bindings below
 super + s; {t,b,v,m}
 	{dateandtime,battery_level,vol,mpd_status}
@@ -35,7 +35,7 @@ super + {r,z,minus}
 	fuzzy_win {run,pdf,clipboard}
 
 super + alt + r
-	pkill -USR1 -x sxhkd
+    pkill -USR1 -x sxhkd
 
 super + Escape
 	bspc quit

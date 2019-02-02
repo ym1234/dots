@@ -22,8 +22,6 @@ greenclip daemon &
 amixer sset Master 100% &
 chromium & disown
 
-xmodmap ~/.Xmodmap &
-
 battery & disown
 { while :; do mpc idle &> /dev/null; mpd_status &> /dev/null; done & } & disown
 # feh --no-fehbg --bg-fill /home/ym/Pictures/Wallpapers/current.png &

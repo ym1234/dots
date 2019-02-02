@@ -8,7 +8,7 @@ TMPDIR="${TMPDIR:-/tmp}"
 pid="$(cat $TMPDIR/record 2> /dev/null)"
 isalive="$(ps -p $pid -o comm= 2> /dev/null)"
 [[ "$isalive" = "ffmpeg" ]] && {
-	kill -SIGINT "$pid"
+	kill -s 2 "$pid"
 	rm "$TMPDIR/record"
 	name="$(< '/tmp/record_name')"
 	rm "$TMPDIR/record_name"

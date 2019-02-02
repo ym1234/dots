@@ -39,6 +39,7 @@ alias lat='exa -lTa'
 
 alias ..="cd .."
 alias ...="cd ../../"
+alias ....="cd ../../.."
 
 alias cbsp='nvim ~/.config/bspwm/bspwmrc ~/.config/bspwm/external_rules ~/.config/sxhkd/sxhkdrc'
 alias csh='nvim ~/.bashrc ~/.bash_profile'
@@ -74,6 +75,12 @@ alias mount='sudo mount'
 alias umount='sudo umount'
 alias fuckingwindows="find . -type f -execdir dos2unix {} \;"
 
+export ytdf="res:360p,worst-audio"
+ytplay() {
+	[ $2 ] && config="${@:2}" || config="$ytdf"
+	ytdl  --filter="$config" -s -o - $1 | mpv --idle -
+}
+
 t() {
 	fasdlist=$( fasd -l -r $1 | fzf --query="$1 " --select-1 --exit-0 --height=25% --reverse --tac --no-sort --cycle)
 	directory=$(file "$fasdlist" | grep directory)
@@ -95,7 +102,6 @@ ff() {
 links() {
 	ls -al $@ --color always | grep '\->'
 }
-
 
 # TODO(ym): implement the options
 delink() {
@@ -124,25 +130,24 @@ sxiv() {
 }
 
 if [ "$TERM" = "linux" ]; then
-	echo -en "\e]P01D1F21" #black
-	echo -en "\e]P8282A2E" #darkgrey
-	echo -en "\e]P1A54242" #darkred
-	echo -en "\e]P9CC6666" #red
-	echo -en "\e]P28C9440" #darkgreen
-	echo -en "\e]PAB5BD68" #green
-	echo -en "\e]P3DE935F" #brown
-	echo -en "\e]PBF0C674" #yellow
-	echo -en "\e]P45F819D" #darkblue
-	echo -en "\e]PC81A2BE" #blue
-	echo -en "\e]P585678F" #darkmagenta
-	echo -en "\e]PD85678F" #magenta
-	echo -en "\e]P65E8D87" #darkcyan
-	echo -en "\e]PE8ABEB7" #cyan
-	echo -en "\e]PFdedede" #lightgrey
-	echo -en "\e]P7C5C8C6" #white
-	# stop the fucking bell
-	setterm -blength 0
-	clear #for background artifacting
+	echo -en "\e]P01D1F21" # black
+	echo -en "\e]P8282A2E" # darkgrey
+	echo -en "\e]P1A54242" # darkred
+	echo -en "\e]P9CC6666" # red
+	echo -en "\e]P28C9440" # darkgreen
+	echo -en "\e]PAB5BD68" # green
+	echo -en "\e]P3DE935F" # brown
+	echo -en "\e]PBF0C674" # yellow
+	echo -en "\e]P45F819D" # darkblue
+	echo -en "\e]PC81A2BE" # blue
+	echo -en "\e]P585678F" # darkmagenta
+	echo -en "\e]PD85678F" # magenta
+	echo -en "\e]P65E8D87" # darkcyan
+	echo -en "\e]PE8ABEB7" # cyan
+	echo -en "\e]PFdedede" # lightgrey
+	echo -en "\e]P7C5C8C6" # white
+	setterm -blength 0     # stop the fucking bell
+	clear                  # for background artifacting
 fi
 
 for i in $GOPATH/src/github.com/junegunn/fzf/shell/*.bash; do
@@ -153,4 +158,3 @@ eval "$(fasd --init auto)"
 if [[ ! ${DISPLAY} && ${XDG_VTNR} == 1 ]]; then
 	startx
 fi
-
