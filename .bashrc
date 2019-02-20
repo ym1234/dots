@@ -82,7 +82,7 @@ ytplay() {
 }
 
 t() {
-	fasdlist=$( fasd -l -r $1 | fzf --query="$1 " --select-1 --exit-0 --height=25% --reverse --tac --no-sort --cycle)
+	fasdlist=$(fasd -l -r $1 | fzf --query="$1 " --select-1 --exit-0 --height=25% --reverse --tac --no-sort --cycle)
 	directory=$(file "$fasdlist" | grep directory)
 	[[ $directory == "" ]] && xdg-open "$fasdlist" || cd "$fasdlist"
 }

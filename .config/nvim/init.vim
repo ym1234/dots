@@ -15,10 +15,10 @@ call plug#begin('~/.config/nvim/plugins/')
     Plug 'wlangstroth/vim-racket'
 	" Idk if i really need it
     Plug 'tpope/vim-fugitive'
+    Plug 'troydm/zoomwintab.vim'
 
     Plug 'airblade/vim-rooter'
     Plug 'chrisbra/Colorizer'
-
 
     Plug 'itchyny/lightline.vim'
     Plug $GOPATH . '/src/github.com/junegunn/fzf'
@@ -28,7 +28,6 @@ call plug#begin('~/.config/nvim/plugins/')
 
     Plug 'tpope/vim-commentary'
     Plug 'tpope/vim-surround'
-
 
     Plug 'tpope/vim-repeat'
     Plug 'kana/vim-textobj-user'
@@ -47,6 +46,7 @@ call plug#begin('~/.config/nvim/plugins/')
     Plug 'junegunn/vim-slash'
 
     Plug 'tpope/vim-eunuch'
+    Plug 'machakann/vim-highlightedyank'
 
     Plug 'tommcdo/vim-exchange'
     Plug 'vim-scripts/ProportionalResize'
@@ -59,13 +59,12 @@ call plug#begin('~/.config/nvim/plugins/')
     Plug 'vim-scripts/ReplaceWithRegister'
     Plug 'drmingdrmer/vim-indent-lua'
 
-    Plug 'machakann/vim-highlightedyank'
-
     Plug 'lambdalisue/suda.vim'
     Plug 'mbbill/undotree'
 
     Plug 'sheerun/vim-polyglot'
     Plug 'autozimu/LanguageClient-neovim', {  'branch': 'next',  'do': './install.sh' }
+	Plug 'solderneer/lightline-languageclient'
 call plug#end()
 
 " }}}
@@ -76,6 +75,7 @@ colorscheme hybrid_reverse
 set cursorline nojoinspaces nostartofline breakindent notimeout nottimeout hidden autowrite autoread nowritebackup nobackup noswapfile undofile noshowmode noequalalways shiftwidth=4 noexpandtab tabstop=4 autoindent hlsearch incsearch smartcase ignorecase splitbelow splitright termguicolors lazyredraw
 set pumheight=10 background=dark spelllang=en_us cino=l1 inccommand=nosplit updatetime=50 undolevels=10000 completeopt-=preview cmdheight=1 diffopt+=vertical tabpagemax=10 history=1000 undodir=~/.config/nvim/tmp/undo listchars=tab:▸\ ,trail:·,eol:¬,nbsp:_ grepprg=rg\ --vimgrep\ --color=never
 let mapleader = "\<Space>"
+let g:enable_italic_font = 1
 
 let g:terminal_color_0 = '#282A2E'
 let g:terminal_color_1 = '#A54242'
@@ -130,16 +130,13 @@ endif
 " }}}
 " Plugin Options {{{
 
+let g:zoomwintab_remap = 0
 let g:LanguageClient_serverCommands = {
 			\ 'rust': ['rustup', 'run', 'nightly', 'rls'],
 			\ 'go': [ 'go-langserver', '-maxparallelism', '8', '-gocodecompletion', '-lint-tool', 'golint', '-diagnostics', '-format-tool', 'goimport' ]
 			\}
-" let g:lsc_server_commands = {
-" 			\ 'rust': 'rustup run nightly rls',
-" 			\ 'go': 'go-langserver -maxparallelism 8 -gocodecompletion -lint-tool golint -diagnostics -format-tool goimport'
-" 			\}
+			" \ 'go': ['bingo']
 
-let g:lsc_auto_map = v:true " Use defaults
 let g:LanguageClient_diagnosticsDisplay =  {
 			\        1: {
 			\            "name": "Error",
@@ -185,16 +182,6 @@ let g:rooter_patterns = ['.gradle', '.git/', 'src/']
 let g:rooter_resolve_links = 1
 let g:rooter_manual_only = 1
 
-function! Warnings() abort
-	let l:all_errors = len(filter(getqflist(), 'v:val.type == "W" || v:val.type == "I"'))
-	return l:all_errors == 0 ? '' : printf('W: ' . '%d', all_errors)
-endfunction
-
-function! Errors() abort
-	let l:all_errors = len(filter(getqflist(), 'v:val.type == "E"'))
-	return l:all_errors == 0 ? '' : printf('E: ' . '%d', all_errors)
-endfunction
-
 autocmd QuitPre * if empty(&buftype) | lclose | endif
 
 let g:lightline = {
@@ -204,15 +191,16 @@ let g:lightline = {
 			\   'gitbranch': ' %{fugitive#head()}',
 			\ },
 			\ 'component_expand' : {
-			\  'linter_warnings': 'Warnings',
-			\  'linter_errors': 'Errors',
+			\  'warning_count': 'lightline#languageclient#warnings',
+			\  'error_count': 'lightline#languageclient#errors',
+			\  'linter_ok': 'lightline#languageclient#ok',
 			\ },
 			\ 'active': {
 			\   'left': [ [ 'mode', 'paste' ],
 			\			  [ 'gitbranch' ],
 			\             [ 'filename', 'readonly', 'modified' ] ],
 			\	'right': [  [ 'percent', 'lineinfo' ],
-			\ 				['linter_warnings' , 'linter_errors'],
+			\ 				['error_count', 'warning_count', 'linter_ok' ],
 			\               [ 'fileformat', 'fileencoding', 'filetype' ] ]
 			\ },
 			\ 'inactive' : {
@@ -220,6 +208,11 @@ let g:lightline = {
 			\ }
 			\ }
 
+			" \ 'component_type' : {
+			" \  'warning_count': 'warning',
+			" \  'error_count': 'error',
+			" \  'linter_ok': 'left',
+			" \ },
 let s:p = { 'normal': {}, 'insert': {}, 'replace': {}, 'visual': {}, 'tabline': {} , 'inactive': {} }
 let s:p.normal = {
 			\	'left': [ [ '#ffffff', '#5f875f'], [ '#c5c8c6', '#282a2e'] ],
@@ -260,8 +253,8 @@ let g:lightline#colorscheme#hybridmodified#palette = lightline#colorscheme#fill(
 autocmd BufWritePre * call TrimWhitespace()
 autocmd BufRead *.h setlocal filetype=c
 
-autocmd Filetype *.rkt setlocal expandtab
-autocmd Filetype *.rkt inoremap lambda λ
+autocmd Filetype racket setlocal expandtab
+autocmd Filetype racket inoremap <buffer> /lm λ
 
 autocmd BufRead .bashrc setlocal foldmethod=marker
 autocmd FileType conf,vim setlocal foldmethod=marker
@@ -270,7 +263,7 @@ autocmd FileType sxhkdrc setlocal commentstring=#\ %s
 autocmd FileType man nnoremap <buffer> gd <C-]>
 
 autocmd FileType fzf setlocal nonumber norelativenumber
-" autocmd WinEnter * call AutoQf()
+" autocmd BufWinEnter * call AutoQf()
 
 autocmd FocusLost * silent! wa
 autocmd FileType * call LC_maps()
@@ -282,13 +275,13 @@ autocmd BufNewFile,BufRead *.hs setlocal tabstop=8 expandtab softtabstop=2 shift
 " }}}
 " Functions/Commands {{{
 
-" function! AutoQf()
-" 	if &filetype ==? "qf"
-" 		setlocal nonumber norelativenumber
-" 		" execute	"normal \<C-w>\<C-p>"
-" 		" execute "normal \<C-w>J\<C-w>="
-" 	endif
-" endfunction
+function! AutoQf()
+	if &filetype ==? "qf"
+		setlocal nonumber norelativenumber
+		execute	"normal \<C-w>\<C-p>"
+		execute "normal \<C-w>J\<C-w>="
+	endif
+endfunction
 
 function! ToggleQf()
   for buffer in tabpagebuflist()
@@ -303,33 +296,18 @@ endfunction
 
 function! LC_maps()
 	if has_key(g:LanguageClient_serverCommands, &filetype)
-		nnoremap <buffer> <silent> K :call LanguageClient#textDocument_hover()<CR>
-		nnoremap <buffer> <silent> gd :call LanguageClient#textDocument_definition()<CR>
+		nnoremap <buffer><silent> K :call LanguageClient#textDocument_hover()<CR>
+		nnoremap <buffer><silent> gd :call LanguageClient#textDocument_definition()<CR>
 		" TODO(ym): Better keybind
-		nnoremap <buffer> <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
-		set formatexpr=LanguageClient#textDocument_rangeFormatting_sync()
+		nnoremap <buffer><silent> <F2> :call LanguageClient#textDocument_rename()<CR>
+		setlocal formatexpr=LanguageClient#textDocument_rangeFormatting_sync()
 		" NOTE: Kinda breaks everything for some reason
 		" autocmd BufWritePre <buffer> call LanguageClient#textDocument_formatting()
-		nnoremap <buffer> <silent> <Leader>u :call LanguageClient#textDocument_formatting()<CR>
+		nnoremap <buffer><silent> <Leader>u :call LanguageClient#textDocument_formatting()<CR>
 		setlocal omnifunc=LanguageClient#complete
 		setlocal completefunc=LanguageClient#complete
 	endif
 endfunction
-
-" Zoom / Restore window.
-function! s:ZoomToggle() abort
-	if exists('t:zoomed') && t:zoomed
-		execute t:zoom_winrestcmd
-		let t:zoomed = 0
-	else
-		let t:zoom_winrestcmd = winrestcmd()
-		resize
-		vertical resize
-		let t:zoomed = 1
-	endif
-endfunction
-command! ZoomToggle call s:ZoomToggle()
-nnoremap <C-w>o :ZoomToggle<CR>
 
 " helper function to toggle hex mode
 " TODO(ym): keybinding
@@ -513,7 +491,7 @@ inoremap jk <ESC>
 " nnoremap <C-i> <C-i>zz
 
 nnoremap <M-n> :cnext<CR>zz
-nnoremap <M-c> :call ToggleQf()<CR>
+nnoremap <silent><M-c> :call ToggleQf()<CR>
 nnoremap <M-p> :cprev<CR>zz
 
 nnoremap gd <C-]>
@@ -541,5 +519,6 @@ nmap ga <Plug>(EasyAlign)
 
 nnoremap <Leader>ae mavap:EasyAlign =<CR>`a
 nnoremap <Leader>at mavap:EasyAlign *\|<CR>`a
-
+nnoremap <leader>n :ZoomWinTabToggle<CR>
 " }}}
+"

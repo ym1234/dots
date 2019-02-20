@@ -42,9 +42,6 @@ function! CscopeQuery(option, bang)
 	endif
 endfunction
 
-let g:ale_c_build_dir_names = [ 'build', 'bin', 'out' ]
-let g:ale_linters = {  'c':  [ 'clang', 'clangd', 'clangformat' ],  'cpp':  [ 'clang', 'clangd', 'clangformat' ]  }
-
 autocmd Filetype c nnoremap <buffer> gd :Cscope 1<CR>
 autocmd Filetype c nnoremap <buffer> <leader>a :FS<CR>
 setlocal cscopeverbose cscopetag

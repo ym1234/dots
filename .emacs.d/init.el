@@ -1,4 +1,4 @@
-;;; This fixed garbage collection, makes emacs start up faster ;;;;;;;
+;;; faster emacs startup time
 (setq gc-cons-threshold 402653184
       gc-cons-percentage 0.6)
 
@@ -9,16 +9,13 @@
   (setq file-name-handler-alist startup/file-name-handler-alist))
 (defun startup/reset-gc ()
   (setq gc-cons-threshold 16777216
-	gc-cons-percentage 0.1))
+        gc-cons-percentage 0.1))
 
 
-;; Minimal UI
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (tooltip-mode -1)
 (menu-bar-mode -1)
-
-(setq inhibit-startup-message t)
 
 (setq locale-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
@@ -26,52 +23,40 @@
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 
-;; No annoying additional files
-(setq make-backup-files nil)
-(setq auto-save-default nil)
-(setq ring-bell-function 'ignore)
+(setq-default
+  backup-inhibited t
+  inhibit-startup-message t
+  auto-save-default nil
+  create-lockfiles nil
+  make-backup-files nil
+  ring-bell-function 'ignore)
 
-;; Shorter prompt
-(defalias 'yes-or-no-p 'y-or-n-p)
-
-;; Package config
 (require 'package)
-(setq package-enable-at-startup nil)
-(setq package-archives '(("org"   . "http://orgmode.org/elpa/")
-						 ("gnu"   . "http://elpa.gnu.org/packages/")
-						 ("melpa" . "https://melpa.org/packages/")))
-
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
 (package-initialize)
 
-;; Bootstrap `use-package`
 (unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-(require 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+(eval-when-compile
+  (require 'use-package))
+(setq-default use-package-always-ensure t)
+
+(defconst custom-file "/dev/zero")
+
+(set-frame-font "curie" nil t)
 
 (use-package evil
-  :ensure t
   :config
-  (evil-mode 1))
+  (evil-mode t)
+  (setq evil-cross-lines t))
 
-(use-package doom-themes
-  :ensure t
+(use-package helm
   :config
-  (load-theme 'doom-one))
+  (helm-autoresize-mode t)
+  (setq helm-autoresize-max-height 30)
+  (setq helm-display-header-line nil)
+  (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
+  (helm-mode t))
 
-(use-package helm :ensure t)
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("6b2636879127bf6124ce541b1b2824800afc49c6ccd65439d6eb987dbf200c36" default))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
