@@ -8,9 +8,11 @@ if empty(glob('~/.config/nvim/plugins/'))
 	autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
+let g:enable_italic_font = 1
 " Plugins {{{
 " NOTE: Indented for easier management with vim-textobj-indent
 call plug#begin('~/.config/nvim/plugins/')
+	Plug  'Vigemus/iron.nvim'
     Plug 'kristijanhusak/vim-hybrid-material'
     Plug 'wlangstroth/vim-racket'
 	" Idk if i really need it
@@ -21,7 +23,7 @@ call plug#begin('~/.config/nvim/plugins/')
     Plug 'chrisbra/Colorizer'
 
     Plug 'itchyny/lightline.vim'
-    Plug $GOPATH . '/src/github.com/junegunn/fzf'
+    Plug $HOME . '/Projects/fzf'
 
     Plug 'junegunn/fzf.vim'
     Plug 'junegunn/vim-easy-align'
@@ -31,6 +33,7 @@ call plug#begin('~/.config/nvim/plugins/')
 
     Plug 'tpope/vim-repeat'
     Plug 'kana/vim-textobj-user'
+	" Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 
     Plug 'kana/vim-textobj-indent'
     Plug 'kana/vim-textobj-function'
@@ -61,6 +64,7 @@ call plug#begin('~/.config/nvim/plugins/')
 
     Plug 'lambdalisue/suda.vim'
     Plug 'mbbill/undotree'
+	Plug 'ndmitchell/ghcid', { 'rtp': 'plugins/nvim' }
 
     Plug 'sheerun/vim-polyglot'
     Plug 'autozimu/LanguageClient-neovim', {  'branch': 'next',  'do': './install.sh' }
@@ -72,10 +76,12 @@ call plug#end()
 
 colorscheme hybrid_reverse
 
-set cursorline nojoinspaces nostartofline breakindent notimeout nottimeout hidden autowrite autoread nowritebackup nobackup noswapfile undofile noshowmode noequalalways shiftwidth=4 noexpandtab tabstop=4 autoindent hlsearch incsearch smartcase ignorecase splitbelow splitright termguicolors lazyredraw
-set pumheight=10 background=dark spelllang=en_us cino=l1 inccommand=nosplit updatetime=50 undolevels=10000 completeopt-=preview cmdheight=1 diffopt+=vertical tabpagemax=10 history=1000 undodir=~/.config/nvim/tmp/undo listchars=tab:▸\ ,trail:·,eol:¬,nbsp:_ grepprg=rg\ --vimgrep\ --color=never
+luafile $HOME/.config/nvim/plugins.lua
+
+set cursorline nojoinspaces nostartofline breakindent notimeout nottimeout hidden autowrite autoread nowritebackup nobackup noswapfile undofile noshowmode noequalalways shiftwidth=4 noexpandtab tabstop=4 autoindent hlsearch incsearch smartcase completeopt-=preview ignorecase splitbelow splitright lazyredraw termguicolors
+set pumheight=10 background=dark spelllang=en_us cino=l1 inccommand=nosplit updatetime=50 undolevels=10000 cmdheight=1 diffopt+=vertical tabpagemax=10 history=1000 undodir=~/.config/nvim/tmp/undo listchars=tab:▸\ ,trail:·,eol:¬,nbsp:_ grepprg=rg\ --vimgrep\ --color=never
+
 let mapleader = "\<Space>"
-let g:enable_italic_font = 1
 
 let g:terminal_color_0 = '#282A2E'
 let g:terminal_color_1 = '#A54242'
@@ -130,18 +136,25 @@ endif
 " }}}
 " Plugin Options {{{
 
+let g:ghcid_keep_open = 1
 let g:zoomwintab_remap = 0
 let g:LanguageClient_serverCommands = {
 			\ 'rust': ['rustup', 'run', 'nightly', 'rls'],
-			\ 'go': [ 'go-langserver', '-maxparallelism', '8', '-gocodecompletion', '-lint-tool', 'golint', '-diagnostics', '-format-tool', 'goimport' ]
+			\ 'go': ['bingo', '-enhance-signature-help']
 			\}
-			" \ 'go': ['bingo']
+			" \ 'go': [ 'go-langserver', '-maxparallelism', '8', '-gocodecompletion', '-lint-tool', 'golint', '-diagnostics', '-format-tool', 'goimport' ]
 
+let g:ghcid_command = "ghcid -c 'cabal new-repl'"
+
+let g:iron_map_defaults = 0
+let g:iron_map_extended = 0
+
+let g:LanguageClient_useVirtualText=1
 let g:LanguageClient_diagnosticsDisplay =  {
 			\        1: {
 			\            "name": "Error",
 			\            "texthl": "Error",
-			\            "signText": ">>",
+			\            "signText": "×",
 			\            "signTexthl": "ALEErrorSign",
 			\        },
 			\        2: {
@@ -263,12 +276,11 @@ autocmd FileType sxhkdrc setlocal commentstring=#\ %s
 autocmd FileType man nnoremap <buffer> gd <C-]>
 
 autocmd FileType fzf setlocal nonumber norelativenumber
-" autocmd BufWinEnter * call AutoQf()
+autocmd BufWinEnter * call AutoQf()
 
 autocmd FocusLost * silent! wa
 autocmd FileType * call LC_maps()
 
-" NOTE: ~~only here until neovim fixes the resize bug~~ Doesn't look like it is needed anymore
 autocmd VimResized * redraw!
 autocmd BufNewFile,BufRead *.hs setlocal tabstop=8 expandtab softtabstop=2 shiftwidth=2 shiftround nosmartindent
 
@@ -278,8 +290,7 @@ autocmd BufNewFile,BufRead *.hs setlocal tabstop=8 expandtab softtabstop=2 shift
 function! AutoQf()
 	if &filetype ==? "qf"
 		setlocal nonumber norelativenumber
-		execute	"normal \<C-w>\<C-p>"
-		execute "normal \<C-w>J\<C-w>="
+		execute "wincmd J | wincmd ="
 	endif
 endfunction
 
@@ -290,7 +301,6 @@ function! ToggleQf()
       return
     endif
   endfor
-
   copen
 endfunction
 
@@ -301,11 +311,11 @@ function! LC_maps()
 		" TODO(ym): Better keybind
 		nnoremap <buffer><silent> <F2> :call LanguageClient#textDocument_rename()<CR>
 		setlocal formatexpr=LanguageClient#textDocument_rangeFormatting_sync()
-		" NOTE: Kinda breaks everything for some reason
-		" autocmd BufWritePre <buffer> call LanguageClient#textDocument_formatting()
+		" autocmd InsertLeave <buffer> call LanguageClient#textDocument_formatting()
 		nnoremap <buffer><silent> <Leader>u :call LanguageClient#textDocument_formatting()<CR>
 		setlocal omnifunc=LanguageClient#complete
 		setlocal completefunc=LanguageClient#complete
+		" call deoplete#enable()
 	endif
 endfunction
 
@@ -448,9 +458,6 @@ vnoremap gy "+y
 vnoremap gY "+y$
 vnoremap gp "+p
 
-imap <C-x><C-f> <Plug>(fzf-complete-path)
-nnoremap <silent><Leader>l :ALELint<CR>
-
 nnoremap 0 ^
 nnoremap ^ 0
 
@@ -486,10 +493,6 @@ nnoremap <silent> <ESC> :noh<CR>
 inoremap jj <ESC>
 inoremap jk <ESC>
 
-" Not sure if i really want these
-" nnoremap <C-o> <C-o>zz
-" nnoremap <C-i> <C-i>zz
-
 nnoremap <M-n> :cnext<CR>zz
 nnoremap <silent><M-c> :call ToggleQf()<CR>
 nnoremap <M-p> :cprev<CR>zz
@@ -520,5 +523,6 @@ nmap ga <Plug>(EasyAlign)
 nnoremap <Leader>ae mavap:EasyAlign =<CR>`a
 nnoremap <Leader>at mavap:EasyAlign *\|<CR>`a
 nnoremap <leader>n :ZoomWinTabToggle<CR>
+
+nnoremap <leader>t :IronRepl
 " }}}
-"

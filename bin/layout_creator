@@ -1,10 +1,10 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # TODO(ym): traverse the hierarchy and spawn the terminals with their children/write a better comment
 
 layout="$(bspc wm -d)"
-canvas="$(extract_canvas <(echo $layout))"
-rules="$(induce_rules <(echo $layout))"
+canvas="$(extract_canvas <(echo "$layout"))"
+rules="$(induce_rules <(echo "$layout"))"
 windows="$(echo "$layout" | jq -r '.. | .? | select (.client.state != null) | .id')"
 
 for i in $windows; do

@@ -1,5 +1,13 @@
 #!/bin/bash
+wid="$1"
+classname="$2"
+instancename="$3"
 
+pid="$(xdotool getwindowpid $wid)"
+read -d " " -ra arr < /proc/$pid/stat
+ppid=${arr[4]}
+
+echo "$@, $pid" > /home/ym/out
 if [[ "$(xdotool getwindowname $1)" =~ fuzzy$ ]] ; then
 	echo "state=floating"
 	xdotool windowmove $1 0 0

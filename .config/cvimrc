@@ -7,7 +7,7 @@ let typelinkhintsdelay = 0
 let hintcharacters = "aoeuidhtnscrg"
 map b :buffer<Space>
 map B :bookmarks<Space>
-map cc lastUsedTab
+map e lastUsedTab
 map - :
 map s %
 unmap <C-6>

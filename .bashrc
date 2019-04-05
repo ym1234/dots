@@ -3,13 +3,6 @@
 # Sperm
 PS1='\W> '
 
-localectl set-x11-keymap us,ar pc104 dvorak,qwerty grp:ctrls_toggle,terminate:ctrl_alt_bksp
-
-set menu-complete-display-prefix on
-set completion-ignore-case on
-set show-all-if-ambiguous on
-set colored-stats on
-set bell-style none
 export GOPATH="/home/ym/Drive/Projects/Go/"
 export CARGO_HOME="$HOME/.local/share/cargo"
 export RUSTUP_HOME="$HOME/.local/share/rustup"
@@ -20,7 +13,7 @@ export _FASD_MAX=10000
 export PATH=$PATH:$HOME/bin:$GOPATH/bin:$CARGO_HOME/bin
 export EDITOR='nvim'
 export VISUAL='nvim'
-export MANPAGER='nvim -c "set ft=man" -'
+export MANPAGER='nvim +Man!'
 export RIPGREP_CONFIG_PATH="$HOME/.config/rg/config"
 
 export FZF_DEFAULT_COMMAND="rg --no-pcre2-unicode --no-config --files --no-messages --no-ignore --hidden --follow -g '!{.git,.cache}'"
@@ -29,6 +22,8 @@ export LESSHISTFILE=-
 export WEECHAT_HOME="~/.config/weechat/"
 export _JAVA_AWT_WM_NONREPARENTING=1
 
+alias c='cat'
+alias free='free -h'
 alias ncpamixer="ncpamixer --config=$HOME/.config/ncpamixer/ncpamixer.conf"
 alias ls='exa'
 alias lt='exa -T'
@@ -45,6 +40,7 @@ alias cbsp='nvim ~/.config/bspwm/bspwmrc ~/.config/bspwm/external_rules ~/.confi
 alias csh='nvim ~/.bashrc ~/.bash_profile'
 alias cvi='nvim ~/.config/nvim/init.vim'
 
+alias xclip='xclip -selection clipboard'
 alias v='f -e nvim'
 alias vi='nvim'
 
@@ -87,6 +83,10 @@ t() {
 	[[ $directory == "" ]] && xdg-open "$fasdlist" || cd "$fasdlist"
 }
 
+swallow() {
+	"$@" & disown && exit
+}
+
 rem() {
 	sudo pacman -Rcns "$@"
 }
@@ -103,6 +103,9 @@ links() {
 	ls -al $@ --color always | grep '\->'
 }
 
+dunstify() {
+	gdbus call -e -d "org.freedesktop.Notifications" -o /org/freedesktop/Notifications -m org.freedesktop.Notifications.Notify "$1" 0 "$2" "$3" "$4" "[]" "{}" 5000
+}
 # TODO(ym): implement the options
 delink() {
 	[[ $# -eq 0 ]] && {
@@ -150,11 +153,13 @@ if [ "$TERM" = "linux" ]; then
 	clear                  # for background artifacting
 fi
 
-for i in $GOPATH/src/github.com/junegunn/fzf/shell/*.bash; do
+for i in ~/Projects/fzf/shell/*.bash; do
 	source $i
 done
+
 eval "$(fasd --init auto)"
 
 if [[ ! ${DISPLAY} && ${XDG_VTNR} == 1 ]]; then
 	startx
 fi
+. /home/ym/.nix-profile/etc/profile.d/nix.sh

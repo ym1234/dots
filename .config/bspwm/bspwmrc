@@ -16,7 +16,7 @@ bspc monitor -d I II III IV V VI VII VIII IX X &
 $br -a Zathura state=tiled &
 
 # hsetroot -solid \#282A2E &
-hsetroot -full Media/Wallpapers/8tyiq6f717kz.png &
+hsetroot -full ~/Media/AnnasWPs/Flat_Earth_Moon_ym555.png
 greenclip daemon &
 # pactl set-sink-volume 0 100% &
 amixer sset Master 100% &

@@ -1,7 +1,7 @@
 #!/bin/sh
 #
-# Modified From Marin'a scripts!
-# move windows
+# stolen from marin/turquoise
+# move windows with bspwm
 
 dir=$1
 
@@ -17,17 +17,13 @@ esac
 # move floating windows
 floating ()
 {
-    percent=3
+    percent=5
 
-    # get a percentage of the monitor resolution
-	var=$(bspc query -T -m | jq .rectangle."$fdim")
-	var=$(($var * percent / 100))
-	current="$(bspc query -T -n focused)"
+    # get a percentage of the monitor horizontal resolution
+    var=$((`bspc query -T -m | jq .rectangle.width` * percent / 100))
 
     [ "$fdim" = width  ] && { x=$sign$var; y=0; }
     [ "$fdim" = height ] && { y=$sign$var; x=0; }
-	next_x=$(`echo "$current" | jv .rectangle.x` + `echo "$current" | jv .rectangle.width` + $x)
-	next_y=$(`echo "$current" | jv .rectangle.y` + `echo "$current" | jv .rectangle.height` + $y)
 
     bspc node -v "$x" "$y"
 }
@@ -38,30 +34,30 @@ tiled ()
     # attempt to replace a preselection or to move a window
     { bspc node -n "$dir.!automatic" || bspc node -s "$dir"; } && return
 
-    while parent=$(bspc query -N -n "$node#@parent"); test "$parent"; do
+    # exit if there is no parent window
+    parent=$(bspc query -N -n "$node#@parent"); test "$parent" || return
 
-        nod_dim=$(bspc query -T -n "$node"   | jq ".rectangle.$tdim")
-        par_dim=$(bspc query -T -n "$parent" | jq ".rectangle.$tdim")
+    nod_dim=$(bspc query -T -n "$node"   | jq ".rectangle.$tdim")
+    par_dim=$(bspc query -T -n "$parent" | jq ".rectangle.$tdim")
 
-        if [ "$par_dim" -gt "$nod_dim" ]; then
-            # create a receptacle
-            # get the receptacle id
-            # replace the receptacle
+    if [ "$par_dim" -gt "$nod_dim" ]; then
+        # create a receptacle
+        # get the receptacle id
+        # replace the receptacle
 
-            bspc node "$parent" -p "$dir" -i
+        bspc node "$parent" -p "$dir"
+        bspc node "$parent" -i
 
-            recept=$(bspc query -N "$parent#@parent" -n .descendant_of.leaf.!window)
+        recept=$(bspc query -N "$parent#@parent" -n .descendant_of.leaf.!window)
 
-            bspc node "$node" -n "$recept"
-            bspc node "$parent" -B
-
-            return
-        fi
-
+        bspc node "$node" -n "$recept"
+        bspc node "$parent" -B
+    else
         node=$parent
-    done
-}
 
+        tiled
+    fi
+}
 
 if bspc query -N -n focused.floating > /dev/null; then
     floating

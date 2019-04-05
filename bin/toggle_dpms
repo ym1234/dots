@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+path=/tmp/dmps_state"${USER:-$(whoami)}"
+state="$(< $path)"
+[[ $state ]] || state="on"
+
+if [[ $state = "on" ]]; then
+	xset s off -dpms
+	echo "off" > $path
+else
+	xset s on +dpms
+	echo "on" > $path
+fi

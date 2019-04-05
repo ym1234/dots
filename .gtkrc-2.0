@@ -2,7 +2,7 @@
 # Any customization should be done in ~/.gtkrc-2.0.mine instead.
 
 include "/home/ym/.gtkrc-2.0.mine"
-gtk-theme-name="Adapta-Nokto-Eta"
+gtk-theme-name="Raleigh"
 gtk-icon-theme-name="Papirus-Adapta-Nokto"
 gtk-font-name="Liberation Sans 9"
 gtk-cursor-theme-name="Dot-Dark"

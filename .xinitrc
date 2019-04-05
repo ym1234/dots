@@ -21,6 +21,8 @@ fi
 xinput set-prop 11 296 1 0 &
 xinput set-prop 11 290 1 &
 
+# xset r rate 260 55 &
+localectl set-x11-keymap us,ar pc104 dvorak,qwerty grp:ctrls_toggle,terminate:ctrl_alt_bksp &
 xmodmap ~/.Xmodmap &
 xcape -e "Hyper_L=Escape" &
 sxhkd -m -1 &
