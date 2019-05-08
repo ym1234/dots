@@ -6,11 +6,13 @@ PS1='\W> '
 export GOPATH="/home/ym/Drive/Projects/Go/"
 export CARGO_HOME="$HOME/.local/share/cargo"
 export RUSTUP_HOME="$HOME/.local/share/rustup"
+export DIRENV_LOG_FORMAT=
 
+export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
 export XDG_DESKTOP_DIR="/tmp"
 export _FASD_DATA="$HOME/.config/fasd/database"
 export _FASD_MAX=10000
-export PATH=$PATH:$HOME/bin:$GOPATH/bin:$CARGO_HOME/bin
+export PATH="$PATH:$HOME/bin:$GOPATH/bin:$CARGO_HOME/bin"
 export EDITOR='nvim'
 export VISUAL='nvim'
 export MANPAGER='nvim +Man!'
@@ -22,6 +24,11 @@ export LESSHISTFILE=-
 export WEECHAT_HOME="~/.config/weechat/"
 export _JAVA_AWT_WM_NONREPARENTING=1
 
+alias lorw='lorri watch > /tmp/lorri_out 2>&1 & '
+alias loli='tail -n 11 /tmp/lorri_out'
+
+# lol use lorri instead
+alias hsenv="nix-shell -p '(import <nixpkgs> {}).haskellPackages.ghcWithHoogle (pkgs: (pkgs.callPackage ./default.nix {}).buildInputs)'"
 alias c='cat'
 alias free='free -h'
 alias ncpamixer="ncpamixer --config=$HOME/.config/ncpamixer/ncpamixer.conf"
@@ -60,31 +67,34 @@ alias gaa='git add -A'
 alias gup='gaa; gc; gp'
 
 alias cfg='git --git-dir=$HOME/Documents/dots/ --work-tree=$HOME'
-alias up='yay -Syyu'
 alias orphan='sudo pacman -Rncs $(pacman -Qtdq)'
 alias py='python'
 
 alias o='a -e xdg-open'
 alias k="killall"
-# alias less='less -rRFX'
+alias less='less -r'
 alias mount='sudo mount'
 alias umount='sudo umount'
 alias fuckingwindows="find . -type f -execdir dos2unix {} \;"
 
 export ytdf="res:360p,worst-audio"
 ytplay() {
-	[ $2 ] && config="${@:2}" || config="$ytdf"
+	[[ $2 ]] && config="${@:2}" || config="$ytdf"
 	ytdl  --filter="$config" -s -o - $1 | mpv --idle -
 }
 
 t() {
-	fasdlist=$(fasd -l -r $1 | fzf --query="$1 " --select-1 --exit-0 --height=25% --reverse --tac --no-sort --cycle)
-	directory=$(file "$fasdlist" | grep directory)
-	[[ $directory == "" ]] && xdg-open "$fasdlist" || cd "$fasdlist"
+	choice="$(fasd -l -r $1 | fzf --query="$1 " --select-1 --exit-0 --height=25% --reverse --tac --no-sort --cycle)"
+	[[ $? != 0  ]] && return
+	[[ -d "$choice" ]] && cd "$choice" || xdg-open "$choice"
 }
 
 swallow() {
 	"$@" & disown && exit
+}
+
+spawn() {
+	"$@" & disown
 }
 
 rem() {
@@ -100,39 +110,60 @@ ff() {
 }
 
 links() {
-	ls -al $@ --color always | grep '\->'
+	ls $@ --color always | grep '\->'
 }
 
-dunstify() {
-	gdbus call -e -d "org.freedesktop.Notifications" -o /org/freedesktop/Notifications -m org.freedesktop.Notifications.Notify "$1" 0 "$2" "$3" "$4" "[]" "{}" 5000
+mydunstify() {
+	# docs ig
+	appname="$1"
+	icon="$2"
+	summary="$3"
+	content="$4"
+	gdbus call -e -d "org.freedesktop.Notifications" -o /org/freedesktop/Notifications -m org.freedesktop.Notifications.Notify "$appname" 0 "$icon" "$summary" "$content" "[]" "{}" 5000
 }
-# TODO(ym): implement the options
+
 delink() {
-	[[ $# -eq 0 ]] && {
+	# Note: not local to this funciton, so it'll get introduced to the environment when you invoke delink
+	# and you can't make it local using the `local` keyword either
+	# *sigh* bash
+	delink_help() {
 		echo "usage: delink <options> <symlinks>"
-		echo "options: (Not implemented yet)"
+		echo "options: "
 		echo " -m: use mv instead of cp"
 		echo " -n: use the filename instead of symlink name"
-		exit 0
 	}
-	for link; do
-		[[ -L $link && -e $link ]] && {
-			path="$(readlink -f $link)"
-			rm $link
-			cp -r $path $link
+
+	[[ $# -eq 0 ]] && delink_help && return 0
+
+	OPTIND=1
+	tool="cp -r"
+	while getopts "hmn" opt $@; do
+		case $opt in
+			m) tool="mv" ;;
+			n) n=1 ;;
+			h) delink_help; return 0 ;;
+			*) return 1 ;;
+		esac
+	done
+
+	for link in "${@:$OPTIND}"; do
+		link="$(realpath --no-symlinks $link)"
+		[[ -L $link ]] && {
+			path="$(realpath -e $link)"
+			[[ $n = 1 ]] && filename="${link%/*}/${path##*/}" || filename="$link"
+			rm "$link"
+			$tool "$path" "$filename"
 		} || echo "Broken link or not a symlink: $link"
 	done
 }
 
 sxiv() {
-	[[ $# -eq 0 ]] && {
-		command sxiv -a -r . & disown
-	} || {
-		command sxiv -a "$@" & disown
-	}
+	[[ $# -eq 0 ]] && args='.' || args="$@"
+	command sxiv -ar "$args" & disown
 }
 
-if [ "$TERM" = "linux" ]; then
+# sudo rmmod pcspkr
+if [[  "$TERM" = "linux" ]]; then
 	echo -en "\e]P01D1F21" # black
 	echo -en "\e]P8282A2E" # darkgrey
 	echo -en "\e]P1A54242" # darkred
@@ -153,13 +184,9 @@ if [ "$TERM" = "linux" ]; then
 	clear                  # for background artifacting
 fi
 
-for i in ~/Projects/fzf/shell/*.bash; do
-	source $i
-done
-
+for i in ~/Projects/fzf/shell/*.bash; do . "$i"; done
+. /home/ym/.nix-profile/etc/profile.d/nix.sh # Sourced in .bash_profile too, maybe i should remove this?
 eval "$(fasd --init auto)"
+eval "$(direnv hook bash)"
 
-if [[ ! ${DISPLAY} && ${XDG_VTNR} == 1 ]]; then
-	startx
-fi
-. /home/ym/.nix-profile/etc/profile.d/nix.sh
+[[ ! $DISPLAY && $XDG_VTNR == 1 ]] && startx

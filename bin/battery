@@ -1,17 +1,19 @@
-#!/bin/sh
-# TODO(ym): POSIXify your shell scripts
+#!/bin/bash
+src() { . <(sed 's/=\(.*\)$/="\1"/g' /sys/class/power_supply/BAT0/uevent); } # the sed isn't actually needed, but silences the errors
 while :; do
-	. /sys/class/power_supply/BAT0/device/power_supply/BAT0/uevent
-	[[ "$POWER_SUPPLY_STATUS" == "Discharging" ]] && {
-		[[ "$POWER_SUPPLY_CAPACITY" -lt 5 ]] && {
-			dunstify -r 220 -u critical -a "Status: Discharging ($POWER_SUPPLY_CAPACITY%)" "suspending in 5 seconds."
-
-			sleep 5
-			systemctl suspend
-		}
-		[[ "$POWER_SUPPLY_CAPACITY" -lt 15 ]] && [[ "$POWER_SUPPLY_CAPACITY" -gt 5 ]] &&  battery_level critical
-	} || {
-		[[ "$POWER_SUPPLY_STATUS" == "Full" ]] && battery_level
-	}
+	src
+	case "$POWER_SUPPLY_STATUS" in
+		Discharging)
+			if [[ "$POWER_SUPPLY_CAPACITY" -lt 5 ]]; then
+				dunstify -r 220 -u critical -a "Status: Discharging ($POWER_SUPPLY_CAPACITY%)" "suspending in 5 seconds."
+				sleep 5
+				src
+				[["$POWER_SUPPLY_STATUS" == "Discharging" ]] && systemctl suspend
+			fi
+			[[ "$POWER_SUPPLY_CAPACITY" -lt 15 && "$POWER_SUPPLY_CAPACITY" -gt 5 ]] && battery_level critical
+			;;
+		Full)
+			battery_level ;;
+	esac
 	sleep 1m
 done

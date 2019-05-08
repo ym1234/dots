@@ -1,7 +1,24 @@
-#!/bin/sh
+#!/bin/bash
 urgency="${1:-normal}"
-. /sys/class/power_supply/BAT0/uevent
+. <(sed 's/=\(.*\)$/="\1"/g' /sys/class/power_supply/BAT0/uevent) # the sed isn't actually needed, but silences the errors
 
-[[ $POWER_SUPPLY_STATUS =~ (Discharging|Full) ]] && stat="Time remaining: $((POWER_SUPPLY_CHARGE_NOW/(-POWER_SUPPLY_CURRENT_NOW))) hours";
-[[ $POWER_SUPPLY_STATUS == "Charging" ]] && stat="Fully charged in: $(((POWER_SUPPLY_CHARGE_FULL - POWER_SUPPLY_CHARGE_NOW) / POWER_SUPPLY_CURRENT_NOW)) hour(s)"
+case "$POWER_SUPPLY_STATUS" in
+	# mfw floating point math in bash
+	Discharging)
+		hour="$((POWER_SUPPLY_CHARGE_NOW  * 1000 / POWER_SUPPLY_CURRENT_NOW))"
+		min=$((60 * (hour - POWER_SUPPLY_CHARGE_NOW / POWER_SUPPLY_CURRENT_NOW * 1000)))
+		hour=$(printf %04d $hour)
+		min=$(printf %05d $min)
+		stat="Time remaining: ${hour:0:1} hours, ${min:0:2} minutes"
+		;;
+	Charging)
+		hour="$(((POWER_SUPPLY_CHARGE_FULL - POWER_SUPPLY_CHARGE_NOW) * 1000 / POWER_SUPPLY_CURRENT_NOW))"
+		min="$((60 * (hour - (POWER_SUPPLY_CHARGE_FULL - POWER_SUPPLY_CHARGE_NOW) / POWER_SUPPLY_CURRENT_NOW * 1000)))"
+		hour=$(printf %04d $hour)
+		min=$(printf %05d $min)
+		stat="Fully charged in: ${hour:0:1} hours, ${min:0:2} minutes"
+		;;
+	*) ;;
+esac
+
 dunstify -r 200 -u $urgency -a "Status: $POWER_SUPPLY_STATUS ($POWER_SUPPLY_CAPACITY%)" "$stat"

@@ -1,15 +1,15 @@
 #!/bin/sh
 # modified from https://github.com/turquoise-hexagon/bin/blob/master/extract
 
-for var in "$@"; do
-	if [ -f "$var" ]; then
-		case $var in
-			*.tar.bz2|*.tar.gz|*.tar.xz|*.tar|*.tgz|*.xz) tar xvf "$1";;
-			*.gz)      gunzip  "$1";;
-			*.zip)     unzip   "$1";;
-			*) echo "'$var' cannot be extracted via extract"
-		esac
-	else
-		echo 'usage : extract [file]'
+for f; do
+	if [ ! -f "$f" ]; then
+		echo "Error: '$f' doesn't exist or is not a file, skipping..."
+		continue
 	fi
+	case $f in
+		*.tar.*|*.tar|*.tgz|*.xz) tar xvf "$f";;
+		*.gz)  gunzip "$f";;
+		*.zip) unzip  "$f";;
+		*) echo "'$f' cannot be extracted via extract"
+	esac
 done

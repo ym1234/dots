@@ -5,27 +5,28 @@
 #
 
 TMPDIR="${TMPDIR:-/tmp}"
-pid="$(cat $TMPDIR/record 2> /dev/null)"
-isalive="$(ps -p $pid -o comm= 2> /dev/null)"
-[[ "$isalive" = "ffmpeg" ]] && {
+pid="$(< $TMPDIR/record)"
+if [[ -d /proc/"$pid/fd" ]]; then
+	name="$(< '/tmp/record_name')"
+
 	kill -s 2 "$pid"
 	rm "$TMPDIR/record"
-	name="$(< '/tmp/record_name')"
 	rm "$TMPDIR/record_name"
 
 	# wait for ffmpeg to finish writing the file and exiting
 	sleep 0.5
 
-	curl -sF"file=@$name" https://0x0.st | xclip -selection clipboard -in
-	notify-send -a "Recording" "$(xclip -selection clipboard -out)"
-} || {
-	slop=$(slop -q -f '%x %y %w %h')
-	[[ $slop == "" ]] && exit 1
+	x=$(curl -sF"file=@$name" https://0x0.st) || notify-send -a "Recording: Upload failed" "$name" && exit # TODO: check if this actually does what you want it to do
+	echo "$x" | xclip -selection clipboard -in
+	notify-send -a "Recording: Upload succeeded" "$x"
+else
+	readarray -t -d' ' coord <<< $(slop -q -f '%x %y %w %h') # XXX: don't quote, or you'll end up with a newline in the last array member
+	[[ ${#coord[@]} = 0 ]] && exit 1
 
-	set $slop
-	name="$HOME/Drive/Media/Recordings/record-$(date +'%F:%R:%S').mp4"
-	ffmpeg -y -f x11grab -s ${3}x${4} -r 30 -i :0.0+${1},${2} -qscale 0 "$name" > /dev/null 2>&1 & disown
+name="$HOME/Drive/Media/Recordings/record-$(date +'%F:%R:%S').mp4"
+	ffmpeg -nostdin -y -f x11grab -s ${coord[2]}x${coord[3]} -r 30 -i :0.0+${coord[0]},${coord[1]} -qscale 0 "$name" > /dev/null 2>&1 & disown
+
 	echo $! > $TMPDIR/record
 	echo "$name" > $TMPDIR/record_name
-}
+fi
 

@@ -10,21 +10,24 @@ windows="$(echo "$layout" | jq -r '.. | .? | select (.client.state != null) | .i
 for i in $windows; do
 	pid=$(xprop -id $i | grep "_NET_WM_PID(CARDINAL)")
 	pid=${pid#*"= "}
+
 	working_directory=$(readlink -e /proc/"$pid"/cwd)
-	if [[ $last_working_directory != $working_directory ]]; then
-		[ -z "$last_working_directory" ] || commandline+='popd'$'\n'
-		commandline+="pushd $working_directory"$'\n'
-	fi
+	[[ $last_working_directory != $working_directory ]] && commandline+="cd $working_directory"$'\n'
+
 	commandline+="$(tr '\000' ' ' < /proc/"$pid"/cmdline)&"$'\n'
 	last_working_directory=$working_directory
 done
-commandline+='disown -a'
 
-script='tmp=$(mktemp)'$'\n'
-script+="echo '"$canvas"' > \$tmp"$'\n'
-script+="bspc wm -l \$tmp"$'\n'
-script+="$rules"$'\n'
-script+="$commandline"$'\n'
-script+='rm $tmp'
+# TODO
+formatted=0
+[[ $formatted = 1 ]] && canvas=$(echo "$canvas" | jq)
 
-echo "$script"
+cat << EOF
+tmp=\$(mktemp)
+echo '$canvas'> \$tmp
+bspc wm -l \$tmp
+$rules
+$commandline
+disown -a
+rm "\$tmp"
+EOF

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 path=/tmp/dmps_state"${USER:-$(whoami)}"
 state="$(< $path)"
-[[ $state ]] || state="on"
+[[ -z $state ]] || state="on"
 
 if [[ $state = "on" ]]; then
 	xset s off -dpms

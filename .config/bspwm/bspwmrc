@@ -1,27 +1,35 @@
 #!/bin/sh
-bc="bspc config"
-br="bspc rule"
-$bc focused_border_color  \#A54242 &
-$bc presel_feedback_color \#A54242 &
-$bc border_width          2 &
-$bc window_gap            4 &
-
-$bc split_ratio           0.5 &
-$bc borderless_monocle    true &
-$bc gapless_monocle       true  &
-
-$bc external_rules_command ~/.config/bspwm/external_rules &
+sxhkd -m -1 &
 bspc monitor -d I II III IV V VI VII VIII IX X &
 
-$br -a Zathura state=tiled &
+rules=(
+"Emacs state=tiled"
+"Zathura state=tiled"
+)
+
+config=(
+"focused_border_color #A54242"
+"presel_feedback_color #A54242"
+"border_width 2"
+"window_gap 4"
+# "external_rules_command $HOME/.config/bspwm/external_rules"
+"split_ratio 0.5"
+"borderless_monocle true"
+"gapless_monocle true"
+)
+
+for i in "${config[@]}"; do bspc config  $i & done
+for i in "${rules[@]}" ; do bspc rule -a $i & done
 
 # hsetroot -solid \#282A2E &
-hsetroot -full ~/Media/AnnasWPs/Flat_Earth_Moon_ym555.png
-greenclip daemon &
-# pactl set-sink-volume 0 100% &
+hsetroot -full ~/Media/AnnasWPs/Flat_Earth_Moon_ym555.png &
 amixer sset Master 100% &
-chromium & disown
 
-battery & disown
-{ while :; do mpc idle &> /dev/null; mpd_status &> /dev/null; done & } & disown
-# feh --no-fehbg --bg-fill /home/ym/Pictures/Wallpapers/current.png &
+chromium &
+battery &
+while :; do mpc idle &> /dev/null; mpd_status &> /dev/null; done &
+xmodmap ~/.Xmodmap &
+xcape -e "Hyper_L=Escape" &
+
+disown -a
+

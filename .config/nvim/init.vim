@@ -24,6 +24,7 @@ call plug#begin('~/.config/nvim/plugins/')
 
     Plug 'itchyny/lightline.vim'
     Plug $HOME . '/Projects/fzf'
+	Plug $HOME . '/Projects/vim-search'
 
     Plug 'junegunn/fzf.vim'
     Plug 'junegunn/vim-easy-align'
@@ -46,7 +47,7 @@ call plug#begin('~/.config/nvim/plugins/')
     Plug 'tpope/vim-endwise'
 
     Plug 'ym1234/vim-fswitch', { 'for': [ 'c', 'cpp' ] }
-    Plug 'junegunn/vim-slash'
+    " Plug 'junegunn/vim-slash'
 
     Plug 'tpope/vim-eunuch'
     Plug 'machakann/vim-highlightedyank'
@@ -497,7 +498,7 @@ nnoremap <M-n> :cnext<CR>zz
 nnoremap <silent><M-c> :call ToggleQf()<CR>
 nnoremap <M-p> :cprev<CR>zz
 
-nnoremap gd <C-]>
+" nnoremap gd <C-]>
 tnoremap <M-n> <C-\><C-n>
 vnoremap <ESC> o<ESC>
 
