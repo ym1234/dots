@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+music_dir=~/Music # set this to your mpd music directory
+
+read -r current_path < <(mpc -f %file%)
+cd "${music_dir}/${current_path%/*}"
+
+for i in *; do
+    [[ $i =~ cover*.(jpg|png) ]] && covers+=("$i")
+    [[ $i =~ .(jpg|png) ]] && covers2+=("$i")
+done
+
+echo "$PWD/${covers[0]:-${covers2[0]}}"
