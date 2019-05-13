@@ -45,7 +45,8 @@
 
 (defconst custom-file "/dev/zero")
 
-(set-frame-font "curie" nil t)
+(add-to-list 'default-frame-alist '(font . "curie"))
+; (set-frame-font "curie" nil t)
 
 (use-package evil
   :config

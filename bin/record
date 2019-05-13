@@ -16,9 +16,10 @@ if [[ -d /proc/"$pid/fd" ]]; then
 	# wait for ffmpeg to finish writing the file and exiting
 	sleep 0.5
 
-	x=$(curl -sF"file=@$name" https://0x0.st) || notify-send -a "Recording: Upload failed" "$name" && exit # TODO: check if this actually does what you want it to do
-	echo "$x" | xclip -selection clipboard -in
-	notify-send -a "Recording: Upload succeeded" "$x"
+	url=$(curl -sF"file=@$name" https://0x0.st)
+	[[ -z $url ]] && notify-send -a "Recording: upload failed" "$name" && exit
+	xclip -selection clipboard -in <<< "$url"
+	notify-send -a " Recording: upload succeeded" "$url"
 else
 	readarray -t -d' ' coord <<< $(slop -q -f '%x %y %w %h') # XXX: don't quote, or you'll end up with a newline in the last array member
 	[[ ${#coord[@]} = 0 ]] && exit 1

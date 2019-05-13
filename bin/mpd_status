@@ -21,6 +21,8 @@ readarray all_lines <<< $(mpc status | sed -e 's/\s\+/ /g') # Normalize spaces
 	body="${all_lines[0]}"
 }
 
-app=$(command -v dunstify || command -v notify-send) || exit
-[[ "$app" =~ "dunstify" ]] && app+=" -r 238401"
+app=$(type -p dunstify || type -p notify-send) || exit
+[[ "$app" =~ dunstify ]] && app+=" -r 238401"
 $app -a "$app_name" "$body"
+# not sure if i like ethe album cover ver
+# $app -a "$app_name" "$body" -i "$(mpd_albumcover)"

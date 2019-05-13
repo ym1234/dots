@@ -162,6 +162,7 @@ sxiv() {
 	command sxiv -ar "$args" & disown
 }
 
+stty -ixon # dont freeze the shel when c-s is pressed
 # sudo rmmod pcspkr
 if [[  "$TERM" = "linux" ]]; then
 	echo -en "\e]P01D1F21" # black
