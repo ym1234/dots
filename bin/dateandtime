@@ -6,4 +6,4 @@ app_name="Time and Date"
 summary="Time: $(date +'%R')"
 body="Date: $(date +'%a %d %b %Y')"
 
-command -v dunstify && dunstify -a "${app_name}" -r 13596705 "${summary}" "${body}" || notify-send -a "${app_name}" "${summary}" "${body}"
+type -p dunstify && dunstify -a "${app_name}" -r 13596705 "${summary}" "${body}" || notify-send -a "${app_name}" "${summary}" "${body}"

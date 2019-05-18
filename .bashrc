@@ -83,10 +83,11 @@ ytplay() {
 	ytdl  --filter="$config" -s -o - $1 | mpv --idle -
 }
 
+# TODO: use $@
 t() {
 	choice="$(fasd -l -r $1 | fzf --query="$1 " --select-1 --exit-0 --height=25% --reverse --tac --no-sort --cycle)"
 	[[ $? != 0  ]] && return
-	[[ -d "$choice" ]] && cd "$choice" || xdg-open "$choice"
+	[[ -d "$choice" ]] && cd "$choice" || rifle "$choice"
 }
 
 swallow() {
