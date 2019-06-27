@@ -1,0 +1,11 @@
+#!/bin/bash
+for i; do
+	d="${i%%.*}"
+	# TODO find an actual better solution
+	if [[ $(tar -tf "$i" | sed 's|^\(\./\)*\([^/]*\).*$|\2|' | sort -u | wc -l) > 1 ]]; then
+		mkdir "$d"
+		tar xvf "$i" -C "$d"
+	else
+		tar xvf "$i"
+	fi
+done

@@ -22,7 +22,7 @@ for i in "${config[@]}"; do bspc config  $i & done
 for i in "${rules[@]}" ; do bspc rule -a $i & done
 
 # hsetroot -solid \#282A2E &
-hsetroot -full ~/Media/AnnasWPs/Flat_Earth_Moon_ym555.png &
+setroot ~/Media/AnnasWPs/Flat_Earth_Moon_ym555.png &
 amixer sset Master 100% &
 
 chromium &

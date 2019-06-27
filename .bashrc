@@ -24,6 +24,8 @@ export LESSHISTFILE=-
 export WEECHAT_HOME="~/.config/weechat/"
 export _JAVA_AWT_WM_NONREPARENTING=1
 
+shopt -s globstar
+
 alias lorw='lorri watch > /tmp/lorri_out 2>&1 & '
 alias loli='tail -n 11 /tmp/lorri_out'
 
@@ -99,7 +101,7 @@ spawn() {
 }
 
 rem() {
-	sudo pacman -Rcns "$@"
+	sudo pacman -Rcns $@
 }
 
 zathura() {

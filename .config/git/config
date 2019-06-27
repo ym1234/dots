@@ -2,6 +2,9 @@
 	email = mohamed.yoyo100@gmail.com
 	name = ym555
 
+[alias]
+	conflicts = diff --name-only --diff-filter=U
+
 [github]
 	user = ym1234
 

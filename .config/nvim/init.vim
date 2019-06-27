@@ -6,13 +6,15 @@ if empty(glob('~/.config/nvim/plugins/'))
 	silent !curl -fLo ~/.config//nvim/autoload/plug.vim --create-dirs
 				\ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 	autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-endif
 
+endif
 let g:enable_italic_font = 1
+" TODO switch to tomorrow dark or something
 " Plugins {{{
 " NOTE: Indented for easier management with vim-textobj-indent
 call plug#begin('~/.config/nvim/plugins/')
 	Plug  'Vigemus/iron.nvim'
+	Plug  'rust-lang/rust.vim'
     Plug 'kristijanhusak/vim-hybrid-material'
     Plug 'wlangstroth/vim-racket'
 	" Idk if i really need it
@@ -65,11 +67,12 @@ call plug#begin('~/.config/nvim/plugins/')
 
     Plug 'lambdalisue/suda.vim'
     Plug 'mbbill/undotree'
+	Plug 'w0rp/ale'
 	Plug 'ndmitchell/ghcid', { 'rtp': 'plugins/nvim' }
 
     Plug 'sheerun/vim-polyglot'
-    Plug 'autozimu/LanguageClient-neovim', {  'branch': 'next',  'do': './install.sh' }
-	Plug 'solderneer/lightline-languageclient'
+    " Plug 'autozimu/LanguageClient-neovim', {  'branch': 'next',  'do': './install.sh' }
+	" Plug 'solderneer/lightline-languageclient'
 call plug#end()
 
 " }}}
@@ -127,8 +130,11 @@ hi PmenuSel guifg=#456887 guibg=#ffffff
 hi PmenuSbar guifg=#456887 guibg=#282a2e
 hi PmenuThumb guifg=#282a2e guibg=#456887
 
-highlight SignColumn guibg=bg
-highlight SignColumn guifg=fg
+hi ALEVirtualTextError guifg=#cc6666
+hi ALEVirtualTextWarning guifg=#F0C674
+
+hi SignColumn guibg=bg
+hi SignColumn guifg=fg
 
 if !isdirectory(expand(&undodir))
 	call mkdir(expand(&undodir), 'p')
@@ -139,18 +145,25 @@ endif
 
 let g:ghcid_keep_open = 1
 let g:zoomwintab_remap = 0
-let g:LanguageClient_serverCommands = {
-			\ 'rust': ['rustup', 'run', 'nightly', 'rls'],
-			\ 'go': ['bingo', '-enhance-signature-help']
-			\}
-			" \ 'go': [ 'go-langserver', '-maxparallelism', '8', '-gocodecompletion', '-lint-tool', 'golint', '-diagnostics', '-format-tool', 'goimport' ]
-
 let g:ghcid_command = "ghcid -c 'cabal new-repl'"
 
 let g:iron_map_defaults = 0
 let g:iron_map_extended = 0
 
 let g:LanguageClient_useVirtualText=1
+
+let g:ale_set_quickfix = 1
+let g:ale_sign_error = '×'
+let g:ale_sign_warning = '!'
+let g:ale_completion_enabled = 1
+let g:ale_fix_on_save = 1
+let g:ale_fixers = { 'go': [ 'goimports' ],   }
+let g:ale_linters = { 'go': [ 'gopls' ], 'rust': [ 'rls' ]}
+let g:ale_virtualtext_cursor = 1
+
+nnoremap gd :ALEGoToDefinition<CR>
+nnoremap K :ALEHover<CR>
+
 let g:LanguageClient_diagnosticsDisplay =  {
 			\        1: {
 			\            "name": "Error",
@@ -266,6 +279,7 @@ let g:lightline#colorscheme#hybridmodified#palette = lightline#colorscheme#fill(
 
 autocmd BufWritePre * call TrimWhitespace()
 autocmd BufRead *.h setlocal filetype=c
+" autocmd WinEnter * if  bufname('%') == "__LanguageClient__"  | setlocal filetype=go | endif
 
 autocmd Filetype racket setlocal expandtab
 autocmd Filetype racket inoremap <buffer> /lm λ
@@ -280,12 +294,11 @@ autocmd FileType fzf setlocal nonumber norelativenumber
 autocmd BufWinEnter * call AutoQf()
 
 autocmd FocusLost * silent! wa
-autocmd FileType * call LC_maps()
+" autocmd FileType * call LC_maps()
 
 autocmd VimResized * redraw!
 autocmd BufNewFile,BufRead *.hs setlocal tabstop=8 expandtab softtabstop=2 shiftwidth=2 shiftround nosmartindent
 
-" }}}
 " Functions/Commands {{{
 
 function! AutoQf()
@@ -305,20 +318,20 @@ function! ToggleQf()
   copen
 endfunction
 
-function! LC_maps()
-	if has_key(g:LanguageClient_serverCommands, &filetype)
-		nnoremap <buffer><silent> K :call LanguageClient#textDocument_hover()<CR>
-		nnoremap <buffer><silent> gd :call LanguageClient#textDocument_definition()<CR>
-		" TODO(ym): Better keybind
-		nnoremap <buffer><silent> <F2> :call LanguageClient#textDocument_rename()<CR>
-		setlocal formatexpr=LanguageClient#textDocument_rangeFormatting_sync()
-		" autocmd InsertLeave <buffer> call LanguageClient#textDocument_formatting()
-		nnoremap <buffer><silent> <Leader>u :call LanguageClient#textDocument_formatting()<CR>
-		setlocal omnifunc=LanguageClient#complete
-		setlocal completefunc=LanguageClient#complete
-		" call deoplete#enable()
-	endif
-endfunction
+" function! LC_maps()
+" 	if has_key(g:LanguageClient_serverCommands, &filetype)
+" 		nnoremap <buffer><silent> K :call LanguageClient#textDocument_hover()<CR>
+" 		nnoremap <buffer><silent> gd :call LanguageClient#textDocument_definition()<CR>
+" 		" TODO(ym): Better keybind
+" 		nnoremap <buffer><silent> <F2> :call LanguageClient#textDocument_rename()<CR>
+" 		setlocal formatexpr=LanguageClient#textDocument_rangeFormatting_sync()
+" 		" autocmd InsertLeave <buffer> call LanguageClient#textDocument_formatting()
+" 		nnoremap <buffer><silent> <Leader>u :call LanguageClient#textDocument_formatting()<CR>
+" 		setlocal omnifunc=LanguageClient#complete
+" 		setlocal completefunc=LanguageClient#complete
+" 		" call deoplete#enable()
+" 	endif
+" endfunction
 
 " helper function to toggle hex mode
 " TODO(ym): keybinding

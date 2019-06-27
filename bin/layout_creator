@@ -20,7 +20,7 @@ done
 
 # TODO
 formatted=0
-[[ $formatted = 1 ]] && canvas=$(echo "$canvas" | jq)
+[[ -z $formatted ]] || canvas="$(echo "$canvas" | jq)"
 
 cat << EOF
 tmp=\$(mktemp)
