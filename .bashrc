@@ -78,6 +78,7 @@ alias less='less -r'
 alias mount='sudo mount'
 alias umount='sudo umount'
 alias fuckingwindows="find . -type f -execdir dos2unix {} \;"
+alias recaudio='pacat --record -d "$(pacmd list | grep -P "^\s*name:.*\.monitor" | head -n1 | sed "s/\s*name\: <\(.*\)>/\1/g")" --file-format=wav ~/Media/ARecordings/$(date +"%F_%H-%M-%S").wav'
 
 export ytdf="res:360p,worst-audio"
 ytplay() {

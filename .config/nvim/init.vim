@@ -16,7 +16,9 @@ call plug#begin('~/.config/nvim/plugins/')
 	Plug  'Vigemus/iron.nvim'
 	Plug  'rust-lang/rust.vim'
     Plug 'kristijanhusak/vim-hybrid-material'
+
     Plug 'wlangstroth/vim-racket'
+
 	" Idk if i really need it
     Plug 'tpope/vim-fugitive'
     Plug 'troydm/zoomwintab.vim'
@@ -83,7 +85,7 @@ colorscheme hybrid_reverse
 luafile $HOME/.config/nvim/plugins.lua
 
 set cursorline nojoinspaces nostartofline breakindent notimeout nottimeout hidden autowrite autoread nowritebackup nobackup noswapfile undofile noshowmode noequalalways shiftwidth=4 noexpandtab tabstop=4 autoindent hlsearch incsearch smartcase completeopt-=preview ignorecase splitbelow splitright lazyredraw termguicolors
-set pumheight=10 background=dark spelllang=en_us cino=l1 inccommand=nosplit updatetime=50 undolevels=10000 cmdheight=1 diffopt+=vertical tabpagemax=10 history=1000 undodir=~/.config/nvim/tmp/undo listchars=tab:▸\ ,trail:·,eol:¬,nbsp:_ grepprg=rg\ --vimgrep\ --color=never
+set pumheight=10 background=dark spelllang=en_us cino=l1 inccommand=nosplit updatetime=50 undolevels=10000 cmdheight=1 diffopt+=vertical tabpagemax=10 history=1000 undodir=~/.config/nvim/tmp/undo listchars=tab:▸\ ,trail:·,eol:¬,nbsp:_ grepprg=rg\ --vimgrep\ --color=never mouse=a
 
 let mapleader = "\<Space>"
 

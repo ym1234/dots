@@ -17,15 +17,16 @@ if [[ -d /proc/"$pid/fd" ]]; then
 	sleep 0.5
 
 	url=$(curl -sF"file=@$name" https://0x0.st)
-	[[ -z $url ]] && notify-send -a "Recording: upload failed" "$name" && exit
+	[[ "$(wc -l <<< "$url")" -gt 1 ]] && notify-send -a "Recording: upload failed" "$name" && exit
+
 	xclip -selection clipboard -in <<< "$url"
-	notify-send -a " Recording: upload succeeded" "$url"
+	notify-send -a "Recording: upload succeeded" "$url"
 else
 	readarray -t -d' ' coord <<< $(slop -q -f '%x %y %w %h') # XXX: don't quote, or you'll end up with a newline in the last array member
 	[[ ${#coord[@]} = 0 ]] && exit 1
 
-name="$HOME/Drive/Media/Recordings/record-$(date +'%F:%R:%S').mp4"
-	ffmpeg -nostdin -y -f x11grab -s ${coord[2]}x${coord[3]} -r 30 -i :0.0+${coord[0]},${coord[1]} -qscale 0 "$name" > /dev/null 2>&1 & disown
+	name="$HOME/Drive/Media/Recordings/$(date +'%F:%R:%S').mp4"
+	ffmpeg -nostdin -y -f x11grab -s ${coord[2]}x${coord[3]} -r 30 -i :0.0+${coord[0]},${coord[1]} "$name" > /dev/null 2>&1 & disown
 
 	echo $! > $TMPDIR/record
 	echo "$name" > $TMPDIR/record_name

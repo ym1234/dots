@@ -8,7 +8,7 @@ while :; do
 				dunstify -r 220 -u critical -a "Status: Discharging ($POWER_SUPPLY_CAPACITY%)" "suspending in 5 seconds."
 				sleep 5
 				src
-				[["$POWER_SUPPLY_STATUS" == "Discharging" ]] && systemctl suspend
+				[[ "$POWER_SUPPLY_STATUS" == "Discharging" ]] && systemctl suspend
 			fi
 			[[ "$POWER_SUPPLY_CAPACITY" -lt 15 && "$POWER_SUPPLY_CAPACITY" -gt 5 ]] && battery_level critical
 			;;
