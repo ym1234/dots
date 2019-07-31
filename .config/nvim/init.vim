@@ -293,7 +293,6 @@ autocmd FileType sxhkdrc setlocal commentstring=#\ %s
 autocmd FileType man nnoremap <buffer> gd <C-]>
 
 autocmd FileType fzf setlocal nonumber norelativenumber
-autocmd BufWinEnter * call AutoQf()
 
 autocmd FocusLost * silent! wa
 " autocmd FileType * call LC_maps()
@@ -302,14 +301,6 @@ autocmd VimResized * redraw!
 autocmd BufNewFile,BufRead *.hs setlocal tabstop=8 expandtab softtabstop=2 shiftwidth=2 shiftround nosmartindent
 
 " Functions/Commands {{{
-
-function! AutoQf()
-	if &filetype ==? "qf"
-		setlocal nonumber norelativenumber
-		execute "wincmd J | wincmd ="
-	endif
-endfunction
-
 function! ToggleQf()
   for buffer in tabpagebuflist()
     if bufname(buffer) == ''
@@ -317,7 +308,8 @@ function! ToggleQf()
       return
     endif
   endfor
-  copen
+  botright copen
+  wincmd p
 endfunction
 
 " function! LC_maps()
