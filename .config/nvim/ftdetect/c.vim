@@ -25,8 +25,8 @@ function! CscopeQuery(option, bang)
 		\ 9: 'Assignments to: '
 		\}
 
-	let out = get(stuff, a:option, 'Invalid option!')
-	if out == 'Invalid option!'
+	let out = get(stuff, a:option, 0)
+	if out == 0
 		echo out
 		return
 	endif

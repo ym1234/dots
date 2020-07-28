@@ -136,3 +136,7 @@
 
 (use-package rust-mode)
 (use-package go-mode)
+
+(add-to-list 'load-path "~/.emacs.d/custom-plugins")
+(require 'awesome-tray)
+(awesome-tray-mode 1)

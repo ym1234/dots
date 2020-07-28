@@ -1,5 +1,5 @@
 #!/bin/bash
-urgency="${1:-normal}"
+urgency="${1:-high}"
 . <(sed 's/=\(.*\)$/="\1"/g' /sys/class/power_supply/BAT0/uevent) # the sed isn't actually needed, but silences the errors
 
 case "$POWER_SUPPLY_STATUS" in

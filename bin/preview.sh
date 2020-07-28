@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 REVERSE="\x1b[7m"
 RESET="\x1b[m"
@@ -22,10 +22,15 @@ if [[ $1 =~ ^[A-Z]:\\ ]]; then
   CENTER=${INPUT[2]}
 fi
 
-if [ ! -f $FILE ]; then
-  echo "File not found ${FILE}"
-  exit 1
+if [[ "$(file --mime "$FILE")" =~ directory ]]; then
+	exa --color=always -al  "$FILE/"
+	exit
 fi
+
+# if [ ! -f $FILE ]; then
+#   echo "File not found ${FILE}"
+#   exit 1
+# fi
 
 if [[ "$(file --mime "$FILE")" =~ binary ]]; then
   echo "$1 is a binary file"

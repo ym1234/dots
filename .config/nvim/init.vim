@@ -14,6 +14,8 @@ let g:enable_italic_font = 1
 " NOTE: Indented for easier management with vim-textobj-indent
 call plug#begin('~/.config/nvim/plugins/')
 	Plug  'Vigemus/iron.nvim'
+	Plug  'qpkorr/vim-renamer'
+
 	Plug  'rust-lang/rust.vim'
     Plug 'kristijanhusak/vim-hybrid-material'
 
@@ -22,11 +24,13 @@ call plug#begin('~/.config/nvim/plugins/')
 	" Idk if i really need it
     Plug 'tpope/vim-fugitive'
     Plug 'troydm/zoomwintab.vim'
+	Plug 'bogado/file-line'
 
     Plug 'airblade/vim-rooter'
     Plug 'chrisbra/Colorizer'
 
     Plug 'itchyny/lightline.vim'
+	" Plug $HOME . '/Projects/vim-hour'
     Plug $HOME . '/Projects/fzf'
 	Plug $HOME . '/Projects/vim-search'
 
@@ -69,7 +73,7 @@ call plug#begin('~/.config/nvim/plugins/')
 
     Plug 'lambdalisue/suda.vim'
     Plug 'mbbill/undotree'
-	Plug 'w0rp/ale'
+	" Plug 'w0rp/ale'
 	Plug 'ndmitchell/ghcid', { 'rtp': 'plugins/nvim' }
 
     Plug 'sheerun/vim-polyglot'
@@ -199,7 +203,8 @@ let b:exchange_indent = 1
 let g:windowswap_map_keys = 0
 let g:ProportionalResize_UpdateTime = 5
 
-let g:fzf_layout = { 'up': '~20%' }
+let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6, 'highlight': 'Todo', 'border': 'sharp' } }
+" let g:fzf_layout = { 'up': '~20%' }
 let g:fzf_action = {
 			\ 'ctrl-t': 'tab split',
 			\ 'ctrl-x': 'split',
@@ -300,6 +305,13 @@ autocmd FocusLost * silent! wa
 autocmd VimResized * redraw!
 autocmd BufNewFile,BufRead *.hs setlocal tabstop=8 expandtab softtabstop=2 shiftwidth=2 shiftround nosmartindent
 
+func! Whatever()
+	let path = expand('%:p:r')
+	let test_path = path . "_test.go"
+	execute "edit" test_path
+endfunc
+
+" }}}
 " Functions/Commands {{{
 function! ToggleQf()
   for buffer in tabpagebuflist()
@@ -454,6 +466,9 @@ vnoremap <S-TAB> <gv
 
 nnoremap Y y$
 
+inoremap -n (
+inoremap -t )
+
 nnoremap j gj
 nnoremap k gk
 vnoremap j gj
@@ -528,7 +543,7 @@ nnoremap S :<C-r>=v:count == 0 ? "%" : ""<CR>s//g<Left><Left>
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
-nnoremap <Leader>ae mavap:EasyAlign =<CR>`a
+nnoremap <Leader>ae mavap:EasyAlign = <CR>`a
 nnoremap <Leader>at mavap:EasyAlign *\|<CR>`a
 nnoremap <leader>n :ZoomWinTabToggle<CR>
 

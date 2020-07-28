@@ -5,6 +5,7 @@
 #
 
 TMPDIR="${TMPDIR:-/tmp}"
+[[ ! -f $TMPDIR/record ]] && touch $TMPDIR/record
 pid="$(< $TMPDIR/record)"
 if [[ -d /proc/"$pid/fd" ]]; then
 	name="$(< '/tmp/record_name')"

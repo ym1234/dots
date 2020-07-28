@@ -1,9 +1,11 @@
 #!/bin/sh
 sxhkd -m -1 &
-bspc monitor -d I II III IV V VI VII VIII IX X &
+bspc monitor -d I II III IV V VI VII VIII IX X
 
 rules=(
 "Emacs state=tiled"
+"Sxiv state=floating"
+"mpv state=floating"
 "Zathura state=tiled"
 )
 
@@ -18,18 +20,16 @@ config=(
 "gapless_monocle true"
 )
 
-for i in "${config[@]}"; do bspc config  $i & done
-for i in "${rules[@]}" ; do bspc rule -a $i & done
+for i in "${config[@]}"; do bspc config  $i; done
+for i in "${rules[@]}" ; do bspc rule -a $i; done
 
 # hsetroot -solid \#282A2E &
-setroot ~/Media/AnnasWPs/Flat_Earth_Moon_ym555.png &
-amixer sset Master 100% &
+# setroot ~/Media/AnnasWPs/Flat_Earth_Moon_ym555.png &
+setroot /home/ym/Media/Wallpapers/1546859319019.png
+amixer sset Master 100%
 
 chromium &
 battery &
 while :; do mpc idle &> /dev/null; mpd_status &> /dev/null; done &
-xmodmap ~/.Xmodmap &
-xcape -e "Hyper_L=Escape" &
-
-disown -a
-
+xmodmap ~/.Xmodmap
+xcape -e "Hyper_L=Escape"
