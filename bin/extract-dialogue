@@ -1,0 +1,112 @@
+#!/bin/sh
+# Modified from https://github.com/brennier/extract-dialogue
+# TODO: needs more testing
+usage() {
+    printf 'Usage: %s -i <video-file> [-a <audio-track] [-s <subtitle-track>] [-o <output-file>] [-p <padding>]
+Options:
+    -i    Specify the video input
+    -a    Specify the audio track number to use
+    -s    Either specify the subtitle track number to use or specify an external subtitle file
+    -o    Specify the output filename
+    -p    Specify padding (in milliseconds) around subtitle timestamps
+    -h    Display this usage message
+
+Only the -i option is required. If not specified, the default behavior is to use the first audio track and the first subtitle track. The default output name is simply the name of the input file with the extension changed to .mp3. The default padding is 100 milliseconds. Similar to ffmpeg, the extension of the output name determines the format of the output.\n' "$(basename $0)"
+    exit 0
+}
+
+error() {
+    echo "Error: $1" >&2
+    exit 1
+}
+
+cat_subs() {
+    subs=$1
+	echo "$subs"
+    if [ -f "$subs" ]; then
+        ffmpeg -y -loglevel fatal -fix_sub_duration -i "$subs" -f ass -
+    else
+        subs_id=$(ffprobe "$file" 2>&1 | grep "Stream .*Subtitle" \
+                  | sed -n "${subs:-1}p" | grep -o '[0-9]:[0-9]')
+        [ -z "$subs_id" ] && error "No text-based subtitles found in '$file'."
+        ffmpeg -loglevel fatal -fix_sub_duration -i "$file" -map $subs_id -f ass -
+    fi
+}
+
+extract_timestamps() {
+    # Extracts timestamps into the format BEGIN:END (in milliseconds)
+    padding=$1
+    timestamps=$(grep "^Dialogue:" - | grep -v ",{" \
+                 | awk -F "," '{ printf "%s,%s,%s\n", $2, $3, $NF } '| sort)
+					 # error "$timestamps"
+					 [ -z "$timestamps" ] && error "Subtitles file was found, but parsing failed."
+
+    # Convert timestamps to milliseconds and pad the timestamps
+    echo "$timestamps" | awk -F ':|,' '{ printf "%d:%d,%s\n", \
+        ( $1 * 3600000 ) + ( $2 * 60000 ) + ($3 * 1000), \
+        ( $4 * 3600000 ) + ( $5 * 60000 ) + ($6 * 1000),
+	    $NF}'
+}
+
+
+while [ -n "$1" ]; do
+    case "$1" in
+        "-i") shift; file=$1    ;;
+        "-a") shift; audio=$1   ;;
+        "-s") shift; subs=$1    ;;
+        "-o") shift; output=$1  ;;
+        "-p") shift; padding=$1 ;;
+		"-k") shift; startpos="$1" ;;
+		"-e") shift; endpos="$1" ;;
+        "-h") usage             ;;
+        *) error "Failed to parse arguments. Use -h for help." ;;
+    esac
+    shift
+done
+
+
+range() {
+	prev_start=0
+	prev_end=0
+	backlog=""
+	# TODO: This is awful, i need to read everything into an array and work on that instead
+	while IFS=: read -r begin end; do
+		if [ "$begin" -lt "$startpos" ]; then
+			prev_start="$begin"
+			prev_end="${end%%,*}"
+			backlog="${end##*,}"
+		else
+			if [ "$prev_end" -gt "$endpos" ]; then
+				echo "$prev_start:$prev_end,$backlog"
+				return
+			fi
+			current_end="${end%%,*}"
+			backlog="$backlog\n${end##*,}"
+			if [ "$current_end" -gt "$endpos" ]; then
+				echo "$prev_start:$current_end,$backlog"
+				return
+			fi
+			break
+		fi
+	done
+
+
+	while IFS=: read -r begin end; do
+	    reallyend=${end%%,*}
+		backlog="$backlog\n${end##*,}"
+		if [ "$reallyend" -gt "$endpos" ]; then
+			echo "$prev_start:$reallyend,$backlog"
+			return
+		fi
+	done
+}
+
+timestamp=$(cat_subs "$subs" | extract_timestamps "${padding:-100}" | range | awk -F':|,' '{ printf "%.3f:%.3f,%s\n", ( $1 / 1000 ), ( $2 / 1000 ), $3 }')
+audio_id=$(ffprobe "$file" 2>&1 | grep "Stream .*Audio" | sed -n "${audio:-1}p" | grep -o '[0-9]:[0-9]')
+
+first="${timestamp%%:*}"
+second="${timestamp##*:}"
+reallysecond="${second%%,*}"
+subs="${second##*,}"
+ffmpeg -v fatal -i "$file" -vn -ss $first -to $reallysecond -map $audio_id output.mp3
+printf "$subs\n" | sed -s "s/\\\\N/\n/g"
