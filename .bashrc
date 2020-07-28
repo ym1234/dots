@@ -1,18 +1,21 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 # Sperm
-PS1='\W> '
+# ^ That joke doesn't work anymore
+PS1="\[\033[01;31m\]\h \[\033[0m\]:: \[\033[00;34m\]\W \[\033[0m\]= "
 
 export GOPATH="/home/ym/Drive/Projects/Go/"
 export CARGO_HOME="$HOME/.local/share/cargo"
 export RUSTUP_HOME="$HOME/.local/share/rustup"
 export DIRENV_LOG_FORMAT=
+export WINEPREFIX="$HOME/Drive/.wine"
 
 export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
 export XDG_DESKTOP_DIR="/tmp"
+export _Z_DATA="$HOME/.config/fasd/database"
 export _FASD_DATA="$HOME/.config/fasd/database"
 export _FASD_MAX=10000
-export PATH="$PATH:$HOME/bin:$GOPATH/bin:$CARGO_HOME/bin"
+export PATH="$PATH:$HOME/bin:$GOPATH/bin:$CARGO_HOME/bin:$HOME/.local/bin"
 export EDITOR='nvim'
 export VISUAL='nvim'
 export MANPAGER='nvim +Man!'
@@ -26,6 +29,7 @@ export _JAVA_AWT_WM_NONREPARENTING=1
 
 shopt -s globstar
 
+alias watch_vcd='mpv "-af=channelmap=1-0"'
 alias lorw='lorri watch > /tmp/lorri_out 2>&1 & '
 alias loli='tail -n 11 /tmp/lorri_out'
 
@@ -78,6 +82,7 @@ alias less='less -r'
 alias mount='sudo mount'
 alias umount='sudo umount'
 alias fuckingwindows="find . -type f -execdir dos2unix {} \;"
+# I have no idea how this one works anymore, good luck future me if this ever stops working
 alias recaudio='pacat --record -d "$(pacmd list | grep -P "^\s*name:.*\.monitor" | head -n1 | sed "s/\s*name\: <\(.*\)>/\1/g")" --file-format=wav ~/Media/ARecordings/$(date +"%F_%H-%M-%S").wav'
 
 export ytdf="res:360p,worst-audio"
@@ -93,6 +98,7 @@ t() {
 	[[ -d "$choice" ]] && cd "$choice" || rifle "$choice"
 }
 
+# TODO(ym): These sometimes misbehave, possibly due to the way they feed the arguments into other programs
 swallow() {
 	"$@" & disown && exit
 }
@@ -126,8 +132,22 @@ mydunstify() {
 	gdbus call -e -d "org.freedesktop.Notifications" -o /org/freedesktop/Notifications -m org.freedesktop.Notifications.Notify "$appname" 0 "$icon" "$summary" "$content" "[]" "{}" 5000
 }
 
+timer() {
+	for ((i=0; i < $1; i++)); {
+		for ((j=0; j < 60; j++)); {
+			echo -ne "\r$i:$j"
+			sleep 1s
+		}
+		# it's not a bug it's a feature
+		echo
+	}
+	mpc play
+}
+
 delink() {
-	# Note: not local to this funciton, so it'll get introduced to the environment when you invoke delink
+	# TIL about unset -f, thanks viz
+	# TODO: use unset -f to solve this problem
+	# NOTE(ym): not local to this function, so it'll get introduced to the environment when you invoke delink
 	# and you can't make it local using the `local` keyword either
 	# *sigh* bash
 	delink_help() {
@@ -140,7 +160,7 @@ delink() {
 	[[ $# -eq 0 ]] && delink_help && return 0
 
 	OPTIND=1
-	tool="cp -r"
+	local tool="cp -r"
 	while getopts "hmn" opt $@; do
 		case $opt in
 			m) tool="mv" ;;
@@ -163,7 +183,7 @@ delink() {
 
 sxiv() {
 	[[ $# -eq 0 ]] && args='.' || args="$@"
-	command sxiv -ar "$args" & disown
+	command sxiv -ar $args & disown
 }
 
 stty -ixon # dont freeze the shel when c-s is pressed
@@ -191,7 +211,8 @@ fi
 
 for i in ~/Projects/fzf/shell/*.bash; do . "$i"; done
 . /home/ym/.nix-profile/etc/profile.d/nix.sh # Sourced in .bash_profile too, maybe i should remove this?
-eval "$(fasd --init auto)"
+# eval "$(fasd --init auto)"
 eval "$(direnv hook bash)"
+[[ -r "/usr/share/z/z.sh" ]] && source /usr/share/z/z.sh
 
 [[ ! $DISPLAY && $XDG_VTNR == 1 ]] && startx
