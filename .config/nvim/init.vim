@@ -73,7 +73,7 @@ call plug#begin('~/.config/nvim/plugins/')
 
     Plug 'lambdalisue/suda.vim'
     Plug 'mbbill/undotree'
-	" Plug 'w0rp/ale'
+	Plug 'w0rp/ale'
 	Plug 'ndmitchell/ghcid', { 'rtp': 'plugins/nvim' }
 
     Plug 'sheerun/vim-polyglot'
@@ -469,6 +469,9 @@ nnoremap Y y$
 inoremap -n (
 inoremap -t )
 
+cnoremap -n (
+cnoremap -t )
+
 nnoremap j gj
 nnoremap k gk
 vnoremap j gj
@@ -501,7 +504,6 @@ nnoremap <Leader>si :PlugInstall<CR>
 nnoremap <Leader><Leader> <C-^>
 nnoremap <Leader>r :Rooter<CR>
 
-nnoremap <silent><Leader>D :bdel!<CR>
 nnoremap <silent><Leader>d :bdel<CR>
 
 nnoremap <Leader>w :w<CR>

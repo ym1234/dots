@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# modified from http://github.com/mitchweaver/bin
+# Records a selected rectangle with ffmpeg.
+#
+
+TMPDIR="${TMPDIR:-/tmp}"
+[[ ! -f $TMPDIR/record ]] && touch $TMPDIR/record
+pid="$(< $TMPDIR/record)"
+if [[ -d /proc/"$pid/fd" ]]; then
+	name="$(< '/tmp/record_name')"
+
+	kill -s 2 "$pid"
+	rm "$TMPDIR/record"
+	rm "$TMPDIR/record_name"
+
+	# wait for ffmpeg to finish writing the file and exiting
+	sleep 0.5
+
+	mv "$TMPDIR/$name" "/home/ym/.local/share/Anki2/User 1/collection.media/"
+	clipboard="$(jq -aRs . <<< $(xclip -selection clipboard -o))"
+
+cat << EOF > /tmp/req
+{
+    "action": "addNote",
+    "version": 6,
+    "params": {
+        "note": {
+            "deckName": "Japanese::Anime cards",
+            "modelName": "Japanese",
+            "fields": {
+			    "Word": $clipboard,
+                "Examples": $clipboard,
+                "Audio": "[sound:$name]"
+            },
+            "tags": [
+                "vn-create",
+				"日本語"
+            ]
+        }
+    }
+}
+EOF
+
+	resp="$(curl --silent -H "Content-Type: application/json" --data @/tmp/req 'http://127.0.0.1:8765/')"
+	cat /tmp/req
+	rm /tmp/req
+	echo "$resp"
+	notify-send -a "Created card successfully" "$resp"
+else
+	name="$(date +'%F:%R:%S').wav"
+	sink="$(pacmd stat | awk -F": " '/^Default sink name: /{print $2}')"
+	pacat --record -d "$sink.monitor" --file-format=wav "$TMPDIR/$name" > /dev/null 2>&1 & disown
+
+	echo $! > $TMPDIR/record
+	echo "$name" > $TMPDIR/record_name
+fi
+

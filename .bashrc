@@ -82,8 +82,11 @@ alias less='less -r'
 alias mount='sudo mount'
 alias umount='sudo umount'
 alias fuckingwindows="find . -type f -execdir dos2unix {} \;"
-# I have no idea how this one works anymore, good luck future me if this ever stops working
-alias recaudio='pacat --record -d "$(pacmd list | grep -P "^\s*name:.*\.monitor" | head -n1 | sed "s/\s*name\: <\(.*\)>/\1/g")" --file-format=wav ~/Media/ARecordings/$(date +"%F_%H-%M-%S").wav'
+
+recaudio() {
+	sink="$(pacmd stat | awk -F": " '/^Default sink name: /{print $2}')"
+	pacat --record -d "$sink.monitor" --file-format=wav "$1" > /dev/null 2>&1 & disown
+}
 
 export ytdf="res:360p,worst-audio"
 ytplay() {
@@ -210,7 +213,7 @@ if [[  "$TERM" = "linux" ]]; then
 fi
 
 for i in ~/Projects/fzf/shell/*.bash; do . "$i"; done
-. /home/ym/.nix-profile/etc/profile.d/nix.sh # Sourced in .bash_profile too, maybe i should remove this?
+# . /home/ym/.nix-profile/etc/profile.d/nix.sh # Sourced in .bash_profile too, maybe i should remove this?
 # eval "$(fasd --init auto)"
 eval "$(direnv hook bash)"
 [[ -r "/usr/share/z/z.sh" ]] && source /usr/share/z/z.sh
