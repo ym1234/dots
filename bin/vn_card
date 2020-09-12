@@ -22,35 +22,57 @@ if [[ -d /proc/"$pid/fd" ]]; then
 
 cat << EOF > /tmp/req
 {
-    "action": "addNote",
+    "action": "findNotes",
     "version": 6,
     "params": {
-        "note": {
-            "deckName": "Japanese::Anime cards",
-            "modelName": "Japanese",
-            "fields": {
-			    "Word": $clipboard,
-                "Examples": $clipboard,
-                "Audio": "[sound:$name]"
-            },
-            "tags": [
-                "vn-create",
-				"日本語"
-            ]
-        }
+        "query": "\"deck:Japanese::Anime cards\" added:1 is:new"
     }
+}
+EOF
+
+
+# I hate it when I'm right about source of the bug. Why can't anki-connect handle piping? no idea, but it can't
+# note_id="$(curl --silent -H "Content-Type: application/json" --data @/tmp/req 'http://127.0.0.1:8765/' | jq  ".result | sort | last")"
+resp="$(curl --silent -H "Content-Type: application/json" --data @/tmp/req 'http://127.0.0.1:8765/')"
+note_id="$(echo "$resp" | jq  ".result | sort | last")"
+echo "$note_id"
+
+cat << EOF > /tmp/req
+{
+  "action": "updateNoteFields",
+  "version": 6,
+  "params": {
+	"note": {
+      "id": $note_id,
+      "fields": {
+        "Examples": $clipboard,
+        "Audio": "[sound:$name]"
+      }
+    }
+  }
 }
 EOF
 
 	resp="$(curl --silent -H "Content-Type: application/json" --data @/tmp/req 'http://127.0.0.1:8765/')"
 	cat /tmp/req
+
+cat << EOF > /tmp/req
+{
+    "action": "addTags",
+    "version": 6,
+    "params": {
+        "notes": [$note_id],
+        "tags": "vn-create"
+    }
+}
+EOF
+	resp="$(curl --silent -H "Content-Type: application/json" --data @/tmp/req 'http://127.0.0.1:8765/')"
 	rm /tmp/req
 	echo "$resp"
 	notify-send -a "Created card successfully" "$resp"
 else
 	name="$(date +'%F:%R:%S').wav"
-	sink="$(pacmd stat | awk -F": " '/^Default sink name: /{print $2}')"
-	pacat --record -d "$sink.monitor" --file-format=wav "$TMPDIR/$name" > /dev/null 2>&1 & disown
+	pacat --record -d "$(pacmd stat | awk -F": " '/^Default sink name: /{print $2}').monitor" --file-format=wav "$TMPDIR/$name" > /dev/null 2>&1 & disown
 
 	echo $! > $TMPDIR/record
 	echo "$name" > $TMPDIR/record_name
