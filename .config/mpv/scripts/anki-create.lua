@@ -39,6 +39,7 @@ function get_source()
 		end
 
 		if k.type == 'sub' and k.selected == true then
+			print('subs')
 			if k.external == true then
 				sub_file = k["external-filename"]
 				sub_external = true
@@ -69,11 +70,13 @@ function create_card()
 	local video_file, subtitle_file, external, track_no, audio_track_no = get_source()
 	print(video_file, subtitle_file, external, track_no, audio_track_no)
 
-	local cmd = '~/bin/extract-dialogue' .. ' -i ' .. ("%q"):format(video_file) .. '  -a ' .. audio_track_no .. ' -k ' .. (start_time * 1000) .. ' -e ' .. (end_time  * 1000) .. ' -s '
+	local cmd = '~/bin/extract-dialogue' .. ' -i ' .. ("%q"):format(video_file) .. '  -a ' .. audio_track_no .. ' -k ' .. (start_time * 1000) .. ' -e ' .. (end_time  * 1000)
 	if external then
-		cmd = cmd .. ("%q"):format(subtitle_file)
+		cmd = cmd .. ' -s ' .. ("%q"):format(subtitle_file)
 	else
-		cmd = cmd .. track_no
+		if track_no ~= nil then
+			cmd = cmd ..  ' -s ' ..track_no
+		end
 	end
 	print(cmd)
 
