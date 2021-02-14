@@ -46,11 +46,11 @@ function get_source()
 				sub_track_no = 0
 			else
 				sub_external = false
-				sub_track_no = k["src-id"] - 1 -- TODO fix this
+				sub_track_no = k["ff-index"] - 1 -- TODO fix this
 			end
 		end
 		if k.type == 'audio' and k.selected == true then
-			audio_track_no = k["src-id"] - 1 -- TODO fix this
+			audio_track_no = k["ff-index"] - 1 -- TODO fix this
 		end
 	end
 	return mp.get_property_native('filename'), sub_file, sub_external, sub_track_no, audio_track_no
@@ -108,7 +108,7 @@ function create_card()
 			}
 		}
 	}
-	print(json.encode(req))
+	-- print(json.encode(req))
 	b, _, _ = http.request('http://127.0.0.1:8765/', json.encode(req))
 	print(b)
 
@@ -125,9 +125,14 @@ end
 function save_clip()
 	local video_file, subtitle_file, _, _, _ = get_source()
 	local new_name = "mpv-clip-" .. os.time() .. ".mp4"
-	my_popen('ln -s ' .. ("%q"):format(subtitle_file) .. ' sub_file', "")
+	if subtitle_file then
+		my_popen('ln -s ' .. ("%q"):format(subtitle_file) .. ' sub_file', "")
+	end
+
 	my_popen('ffmpeg -v fatal -ss ' .. start_time  .. ' -to ' .. end_time .. " -copyts -i " .. ("%q"):format(video_file)  .. " -vf subtitles=sub_file -reset_timestamps 1 " .. new_name, "")
-	my_popen('rm sub_file', "")
+	if subtitle_file then
+		my_popen('rm sub_file', "")
+	end
 	mp.osd_message('Clip: ' .. new_name)
 end
 

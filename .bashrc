@@ -13,6 +13,7 @@ export WINEPREFIX="$HOME/Drive/.wine"
 export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
 export XDG_DESKTOP_DIR="/tmp"
 export _Z_DATA="$HOME/.config/fasd/database"
+export _ZL_DATA="$HOME/.config/fasd/database"
 export _FASD_DATA="$HOME/.config/fasd/database"
 export _FASD_MAX=10000
 export PATH="$PATH:$HOME/bin:$GOPATH/bin:$CARGO_HOME/bin:$HOME/.local/bin"
@@ -216,6 +217,8 @@ for i in ~/Projects/fzf/shell/*.bash; do . "$i"; done
 # . /home/ym/.nix-profile/etc/profile.d/nix.sh # Sourced in .bash_profile too, maybe i should remove this?
 # eval "$(fasd --init auto)"
 eval "$(direnv hook bash)"
-[[ -r "/usr/share/z/z.sh" ]] && source /usr/share/z/z.sh
+# [[ -r "/usr/share/z/z.sh" ]] && source /usr/share/z/z.sh
+[[ -r "/usr/share/z.lua/z.lua" ]] && eval "$(luajit /usr/share/z.lua/z.lua --init bash enhanced once echo fzf)"
+# eval "$(zoxide init bash)"
 
 [[ ! $DISPLAY && $XDG_VTNR == 1 ]] && startx

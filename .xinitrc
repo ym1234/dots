@@ -17,12 +17,12 @@ if [ -d /etc/X11/xinit/xinitrc.d ] ; then
  unset f
 fi
 
-xinput set-prop 11 296 1 0 &
-xinput set-prop 11 290 1 &
-xinput set-prop 11 317 0 &
+#xinput set-prop 11 296 1 0 &
+#xinput set-prop 11 290 1 &
+#xinput set-prop 11 317 0 &
 # xset r rate 260 55 &
 localectl set-x11-keymap us,ar pc104 dvorak,qwerty grp:ctrls_toggle,terminate:ctrl_alt_bksp &
-# setxkbmap -model pc104 -layout 'us(dvorak-intl),us(alt-intl),ar' -option grp:alt_shift_toggle,terminate:ctrl_alt_bksp &
+setxkbmap -model pc104 -layout 'us(dvorak-intl),us(alt-intl),ar' -option grp:alt_shift_toggle,terminate:ctrl_alt_bksp &
 fcitx &
 wineserver --persistent &
 exec bspwm

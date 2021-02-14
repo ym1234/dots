@@ -3,7 +3,7 @@
 case $1 in
 	increase) amixer sset Master 1%+ ;;
 	decrease) amixer sset Master 1%- ;;
-	toggle) amixer sset Master toggle ;;
+	toggle) amixer sset Master toggle;;
 esac
 
 $(amixer sget Master | grep -o '\[off\]' > /dev/null) && muted='Muted' || muted='Unmuted'

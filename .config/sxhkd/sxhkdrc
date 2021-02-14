@@ -4,8 +4,8 @@
 alt + Print
 	record
 
-XF86Audio{Play,Prev,Next}
-	mpc {toggle,prev,next}
+XF86Audio{Play,Pause,Prev,Next}
+	mpc {toggle,toggle,prev,next}
 
 XF86MonBrightness{Up,Down}
 	brightness {+,-}
@@ -31,8 +31,14 @@ super + s; {t,b,v,m}
 
 # TODO(ym): Fix these
 # Or use rofi/dmenu/bmenu
-super + {r,z,minus}
-	fuzzy_win {run,pdf,clipboard}
+# super + {r,z,minus}
+# 	fuzzy_win {run,pdf,clipboard}
+
+super + b
+	vn_card
+
+super + r
+     dmenu_run -fn curie
 
 super + alt + r
     pkill -USR1 -x sxhkd
@@ -66,10 +72,10 @@ super + s; {p,a,comma,period}
 	bspc node -f @{parent,brother,first,second}
 
 super + {_,alt + }c
-	bspc node -f {next,prev}.local
+	bspc node -f {next,prev}.local.normal
 
-super + bracket{left,right}
-	bspc desktop -f {prev,next}.local
+super + {_,alt ,} + bracket{left,right}
+	bspc {desktop -f,node -d} {prev,next}.local
 
 alt + {grave,Tab}
 	bspc {node,desktop} -f last

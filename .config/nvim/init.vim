@@ -504,6 +504,7 @@ nnoremap <Leader>si :PlugInstall<CR>
 nnoremap <Leader><Leader> <C-^>
 nnoremap <Leader>r :Rooter<CR>
 
+nnoremap <silent><Leader>D :bdel!<CR>
 nnoremap <silent><Leader>d :bdel<CR>
 
 nnoremap <Leader>w :w<CR>

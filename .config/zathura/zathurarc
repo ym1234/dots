@@ -8,8 +8,9 @@ set smooth-scroll true
 set highlight-transparency 0.3
 
 set adjust-open "width"
-set font "curie normal 8"
+# set font "curie normal 8"
 
+map ; toggle_page_mode
 map d scroll half-down
 map u scroll half-up
 

@@ -15,5 +15,5 @@ while :; do
 		Full)
 			battery_level ;;
 	esac
-	sleep 1m
+	sleep 5m
 done

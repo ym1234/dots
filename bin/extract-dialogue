@@ -100,15 +100,16 @@ range() {
 	done
 }
 
-timestamp=$(cat_subs "$subs" | extract_timestamps "${padding:-100}" | range | awk -F':|,' '{ printf "%.3f:%.3f,%s\n", ( $1 / 1000 ), ( $2 / 1000 ), $3 }')
-audio_id=$(ffprobe "$file" 2>&1 | grep "Stream .*Audio" | sed -n "${audio:-1}p" | grep -o '[0-9]:[0-9]')
-if [[ -z "${audio_id// }" ]]; then
-	audio_id=$(ffprobe "$file" 2>&1 | grep "Stream .*Audio" | grep -o '[0-9]:[0-9]')
-fi
+cat_subs "$subs"
+# timestamp=$(cat_subs "$subs" | extract_timestamps "${padding:-100}" | range | awk -F':|,' '{ printf "%.3f:%.3f,%s\n", ( $1 / 1000 ), ( $2 / 1000 ), $3 }')
+# audio_id=$(ffprobe "$file" 2>&1 | grep "Stream .*Audio" | sed -n "${audio:-1}p" | grep -o '[0-9]:[0-9]')
+# if [[ -z "${audio_id// }" ]]; then
+# 	audio_id=$(ffprobe "$file" 2>&1 | grep "Stream .*Audio" | grep -o '[0-9]:[0-9]')
+# fi
 
-first="${timestamp%%:*}"
-second="${timestamp##*:}"
-reallysecond="${second%%,*}"
-subs="${second##*,}"
-ffmpeg -v fatal -i "$file" -vn -ss $first -to $reallysecond -map $audio_id output.mp3
-printf "$subs\n" | sed -s "s/\\\\N/\n/g"
+# first="${timestamp%%:*}"
+# second="${timestamp##*:}"
+# reallysecond="${second%%,*}"
+# subs="${second##*,}"
+# ffmpeg -v fatal -i "$file" -vn -ss $first -to $reallysecond -map $audio_id output.mp3
+# printf "$subs\n" | sed -s "s/\\\\N/\n/g"

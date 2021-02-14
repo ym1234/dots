@@ -28,8 +28,8 @@ for i in "${rules[@]}" ; do bspc rule -a $i; done
 setroot /home/ym/Media/Wallpapers/1546859319019.png
 amixer sset Master 100%
 
-chromium &
 battery &
 while :; do mpc idle &> /dev/null; mpd_status &> /dev/null; done &
+chromium
 xmodmap ~/.Xmodmap
 xcape -e "Hyper_L=Escape"
