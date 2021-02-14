@@ -14,9 +14,6 @@ from multiprocessing import Pool
 from collections import defaultdict
 import chardet
 
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
-os.chdir('..')
-
 class mopen:
     def __init__(self, filename, mode='r', **kwargs):
         self.real_encoding = chardet.detect(open(filename, 'rb').read())['encoding'].lower()
@@ -194,8 +191,6 @@ def alphanum_key(s):
 if __name__ == '__main__':
     # Guess the local mkv/srt pairs that need syncing
     files = os.listdir()
-    print(files)
-    exit()
     CONF = {}
     print('[1] .srt files (Default)')
     print('[2] .ass files')
