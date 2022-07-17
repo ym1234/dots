@@ -221,4 +221,8 @@ eval "$(direnv hook bash)"
 [[ -r "/usr/share/z.lua/z.lua" ]] && eval "$(luajit /usr/share/z.lua/z.lua --init bash enhanced once echo fzf)"
 # eval "$(zoxide init bash)"
 
+if [[ ! "$SSH_AUTH_SOCK" ]]; then
+    source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
+fi
+
 [[ ! $DISPLAY && $XDG_VTNR == 1 ]] && startx
