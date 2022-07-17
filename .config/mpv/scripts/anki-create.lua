@@ -1,5 +1,5 @@
 local mp = require('mp')
-local msg = require 'mp.msg')
+local msg = require('mp.msg')
 local utils = require('mp.utils')
 
 local os = require('os')
