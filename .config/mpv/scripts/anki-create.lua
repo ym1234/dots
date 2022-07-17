@@ -165,6 +165,8 @@ local function ex()
 		mp.osd_message(ret, 10)
 		cleanup()
 		msg.info('finished cleaning up')
+	else
+		mp.osd_message("updated card", 5)
 	end
 end
 
