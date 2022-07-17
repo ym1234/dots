@@ -13,6 +13,8 @@ if [[ -d /proc/"$pid/fd" ]]; then
 	kill -s 2 "$pid"
 	rm "$TMPDIR/record"
 	rm "$TMPDIR/record_name"
+	rm "$TMPDIR/ffmpeg_out"
+	notify-send -a "Recording: uploading clip" "$(basename $name)"
 
 	# wait for ffmpeg to finish writing the file and exiting
 	sleep 0.5
@@ -27,7 +29,7 @@ else
 	[[ ${#coord[@]} = 0 ]] && exit 1
 
 	name="$HOME/Drive/Media/Recordings/$(date +'%F:%R:%S').mp4"
-	ffmpeg -nostdin -y -f x11grab -s ${coord[2]}x${coord[3]} -r 30 -i :0.0+${coord[0]},${coord[1]} "$name" > /dev/null 2>&1 & disown
+	ffmpeg -nostdin -y -f x11grab -s ${coord[2]}x${coord[3]} -r 30 -i :0.0+${coord[0]},${coord[1]} "$name" > $TMPDIR/ffmpeg_out 2>&1 & disown
 
 	echo $! > $TMPDIR/record
 	echo "$name" > $TMPDIR/record_name

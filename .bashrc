@@ -1,14 +1,12 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
-# Sperm
-# ^ That joke doesn't work anymore
 PS1="\[\033[01;31m\]\h \[\033[0m\]:: \[\033[00;34m\]\W \[\033[0m\]= "
 
 export GOPATH="/home/ym/Drive/Projects/Go/"
 export CARGO_HOME="$HOME/.local/share/cargo"
 export RUSTUP_HOME="$HOME/.local/share/rustup"
 export DIRENV_LOG_FORMAT=
-export WINEPREFIX="$HOME/Drive/.wine"
+export WINEPREFIX="$HOME/Drive2/.wine32"
 
 export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
 export XDG_DESKTOP_DIR="/tmp"
@@ -27,12 +25,14 @@ export FZF_DEFAULT_OPTS="--reverse --inline-info --preview='~/bin/preview.sh {}'
 export LESSHISTFILE=-
 export WEECHAT_HOME="~/.config/weechat/"
 export _JAVA_AWT_WM_NONREPARENTING=1
+alias pkexec='pkexec env HOME=/home/ym/ DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY'
 
-shopt -s globstar
+shopt -s globstar extglob
 
 alias watch_vcd='mpv "-af=channelmap=1-0"'
 alias lorw='lorri watch > /tmp/lorri_out 2>&1 & '
 alias loli='tail -n 11 /tmp/lorri_out'
+alias cam='mpv -vf=hflip /dev/video0'
 
 # lol use lorri instead
 alias hsenv="nix-shell -p '(import <nixpkgs> {}).haskellPackages.ghcWithHoogle (pkgs: (pkgs.callPackage ./default.nix {}).buildInputs)'"
@@ -209,7 +209,7 @@ if [[  "$TERM" = "linux" ]]; then
 	echo -en "\e]PE8ABEB7" # cyan
 	echo -en "\e]PFdedede" # lightgrey
 	echo -en "\e]P7C5C8C6" # white
-	setterm -blength 0     # stop the fucking bell
+	# setterm -blength 0     # stop the fucking bell
 	clear                  # for background artifacting
 fi
 

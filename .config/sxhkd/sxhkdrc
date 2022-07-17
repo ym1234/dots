@@ -1,4 +1,4 @@
-{_,super +} Print
+{super +,_} Print
 	screenshot {_,area}
 
 alt + Print

@@ -18,14 +18,15 @@ if [[ -d /proc/"$pid/fd" ]]; then
 	sleep 0.5
 
 	mv "$TMPDIR/$name" "/home/ym/.local/share/Anki2/User 1/collection.media/"
-	clipboard="$(jq -aRs . <<< "$(xclip -selection clipboard -o | while read line; do echo -n "$line<br>"; done)")"
+	clipboard="$(jq -aRs . <<< "$((xclip -selection clipboard -o; echo) | while read -r line; do echo -n "$line<br>"; done)")"
+	echo $clipboard
 
 cat << EOF > /tmp/req
 {
     "action": "findNotes",
     "version": 6,
     "params": {
-        "query": "\"deck:Japanese::Anime cards\" added:1 is:new"
+        "query": "deck:* added:1 is:new"
     }
 }
 EOF
@@ -70,10 +71,10 @@ EOF
 	echo "$resp"
 	notify-send -a "Finished recording" "$resp"
 else
-	name="$(date +'%F:%R:%S').wav"
+	name="$(date +'%F%H%M%S').wav"
 	pacat --record -d "$(pacmd stat | awk -F": " '/^Default sink name: /{print $2}').monitor" --file-format=wav "$TMPDIR/$name" > /dev/null 2>&1 & disown
 
-	notify-send -a "Started recording" "$resp"
+	notify-send -a "Started recording" "$name"
 
 	echo $! > $TMPDIR/record
 	echo "$name" > $TMPDIR/record_name

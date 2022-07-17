@@ -146,8 +146,9 @@ local function record_sub(_, text)
     if newtext == '' then
       return
     end
-
-    subs[newtext] = { mp.get_property_number('sub-start') + sub_delay, mp.get_property_number('sub-end') + sub_delay }
+    sub_start = mp.get_property_number('sub-start') or 0
+    sub_end = mp.get_property_number('sub-end') or 0
+    subs[newtext] = { sub_start + sub_delay, sub_end + sub_delay }
     dlog(string.format("%s -> %s : %s", subs[newtext][1], subs[newtext][2], newtext))
     if enable_subs_to_clip then
       if platform == 'windows' then

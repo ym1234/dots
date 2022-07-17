@@ -21,8 +21,15 @@ fi
 #xinput set-prop 11 290 1 &
 #xinput set-prop 11 317 0 &
 # xset r rate 260 55 &
-localectl set-x11-keymap us,ar pc104 dvorak,qwerty grp:ctrls_toggle,terminate:ctrl_alt_bksp &
-setxkbmap -model pc104 -layout 'us(dvorak-intl),us(alt-intl),ar' -option grp:alt_shift_toggle,terminate:ctrl_alt_bksp &
-fcitx &
-wineserver --persistent &
+localectl set-x11-keymap us,ar pc104 dvorak,qwerty grp:ctrls_toggle,terminate:ctrl_alt_bksp
+setxkbmap -model pc104 -layout 'us(dvorak-intl),us(alt-intl),ar' -option grp:alt_shift_toggle,terminate:ctrl_alt_bksp
+fcitx -d
+sxhkd -m -1 &
+battery &
+frovo.py &
+while :; do mpc idle &> /dev/null; mpd_status &> /dev/null; done &
+aw-server-rust &
+aw-watcher-window &
+aw-watcher-afk &
+polkit-dumb-agent &
 exec bspwm

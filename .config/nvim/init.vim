@@ -10,9 +10,10 @@ if empty(glob('~/.config/nvim/plugins/'))
 endif
 let g:enable_italic_font = 1
 " TODO switch to tomorrow dark or something
-" Plugins {{{
+" Vim Plugins {{{
 " NOTE: Indented for easier management with vim-textobj-indent
 call plug#begin('~/.config/nvim/plugins/')
+	Plug 'ActivityWatch/aw-watcher-vim'
 	Plug  'Vigemus/iron.nvim'
 	Plug  'qpkorr/vim-renamer'
 
@@ -73,7 +74,7 @@ call plug#begin('~/.config/nvim/plugins/')
 
     Plug 'lambdalisue/suda.vim'
     Plug 'mbbill/undotree'
-	Plug 'w0rp/ale'
+	" Plug 'w0rp/ale'
 	Plug 'ndmitchell/ghcid', { 'rtp': 'plugins/nvim' }
 
     Plug 'sheerun/vim-polyglot'
@@ -88,7 +89,7 @@ colorscheme hybrid_reverse
 
 luafile $HOME/.config/nvim/plugins.lua
 
-set cursorline nojoinspaces nostartofline breakindent notimeout nottimeout hidden autowrite autoread nowritebackup nobackup noswapfile undofile noshowmode noequalalways shiftwidth=4 noexpandtab tabstop=4 autoindent hlsearch incsearch smartcase completeopt-=preview ignorecase splitbelow splitright lazyredraw termguicolors
+set cursorline nojoinspaces nostartofline breakindent notimeout nottimeout hidden autowrite autoread nowritebackup nobackup noswapfile undofile noshowmode noequalalways shiftwidth=4 noexpandtab tabstop=4 autoindent hlsearch incsearch smartcase completeopt-=preview ignorecase splitbelow splitright lazyredraw termguicolors " TODO(ym): reset this
 set pumheight=10 background=dark spelllang=en_us cino=l1 inccommand=nosplit updatetime=50 undolevels=10000 cmdheight=1 diffopt+=vertical tabpagemax=10 history=1000 undodir=~/.config/nvim/tmp/undo listchars=tab:▸\ ,trail:·,eol:¬,nbsp:_ grepprg=rg\ --vimgrep\ --color=never mouse=a
 
 let mapleader = "\<Space>"
@@ -222,7 +223,7 @@ let g:lightline = {
 			\ 'colorscheme': 'hybridmodified',
 			\ 'component': {
 			\   'lineinfo': ' %3l:%-2v',
-			\   'gitbranch': ' %{fugitive#head()}',
+			\   'gitbranch': ' %{FugitiveHead()}',
 			\ },
 			\ 'component_expand' : {
 			\  'warning_count': 'lightline#languageclient#warnings',
@@ -465,12 +466,6 @@ vnoremap <TAB> >gv
 vnoremap <S-TAB> <gv
 
 nnoremap Y y$
-
-inoremap -n (
-inoremap -t )
-
-cnoremap -n (
-cnoremap -t )
 
 nnoremap j gj
 nnoremap k gk

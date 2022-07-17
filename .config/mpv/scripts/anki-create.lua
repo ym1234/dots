@@ -1,142 +1,193 @@
 local mp = require('mp')
-local http = require("socket.http")
-local math = require('math')
-local io = require('io')
+local msg = require 'mp.msg')
+local utils = require('mp.utils')
+
 local os = require('os')
+local math = require('math')
 local table = require('table')
 local string = require('string')
 
-local json =  require('cjson')
-local start_time = 0
-local end_time = 0
+local http = require('socket.http')
 
-local deck_name = "Japanese::Anime cards"
-local model_name = "Japanese"
-local collection = "/home/ym/.local/share/Anki2/User 1/collection.media/"
-local sentence_field = "Examples"
-local word_field = "Word"
-local audio_field = "Audio"
+local anki_address = 'http://127.0.0.1:8765/'
 
-function render()
-	mp.osd_message("Sub start time: " .. start_time .. "\nSub end time: " .. end_time)
+local deck = '07. 日本語::Anime cards'
+local prefix = utils.join_path(os.getenv('HOME'), [[.local/share/Anki2/User 1/collection.media]])
+
+local AUDIO_CLIP_FADE = 0.2
+local AUDIO_CLIP_PADDING = 0.75
+
+local IMAGE_FIELD = 'Image'
+local AUDIO_FIELD = 'Audio'
+
+-- get_name, create_audio, create_screenshot are from animecard.lua
+local function get_name(s, e)
+	return mp.get_property('filename'):gsub('%W','') .. tostring(s) .. tostring(e)
 end
 
-function set_start()
-	start_time = mp.get_property_native('time-pos')
-	render()
-end
+local function create_audio(s, e)
+	if s == nil or e == nil then
+		return
+	end
 
-function set_end()
-	end_time = mp.get_property_native('time-pos')
-	render()
-end
+	local name = get_name(s, e)
+	local destination = utils.join_path(prefix, name .. '.mp3')
+	s = s - AUDIO_CLIP_PADDING
+	local t = e - s + AUDIO_CLIP_PADDING
+	local source = mp.get_property('path')
+	local aid = mp.get_property('aid')
 
-function get_source()
-	local sub_file, sub_external, sub_track_no, audio_track_no
-	for i, k in ipairs(mp.get_property_native('track-list')) do
-		if audio_track_no ~= nil and sub_external ~= nil then
+	local tracks_count = mp.get_property_number('track-list/count')
+	for i = 1, tracks_count do
+		local track_type = mp.get_property(string.format('track-list/%d/type', i))
+		local track_selected = mp.get_property(string.format('track-list/%d/selected', i))
+		if track_type == 'audio' and track_selected == 'yes' then
+			if mp.get_property(string.format('track-list/%d/external-filename', i), o) ~= o then
+				source = mp.get_property(string.format('track-list/%d/external-filename', i))
+				aid = 'auto'
+			end
 			break
 		end
-
-		if k.type == 'sub' and k.selected == true then
-			print('subs')
-			if k.external == true then
-				sub_file = k["external-filename"]
-				sub_external = true
-				sub_track_no = 0
-			else
-				sub_external = false
-				sub_track_no = k["ff-index"] - 1 -- TODO fix this
-			end
-		end
-		if k.type == 'audio' and k.selected == true then
-			audio_track_no = k["ff-index"] - 1 -- TODO fix this
-		end
 	end
-	return mp.get_property_native('filename'), sub_file, sub_external, sub_track_no, audio_track_no
-end
 
-function my_popen(arg, sep)
-	local file = io.popen(arg)
-	local out = ""
-	for line in file:lines() do
-		out = out .. line .. sep
-	end
-	file:close()
-	return out
-end
 
-function create_card()
-	local video_file, subtitle_file, external, track_no, audio_track_no = get_source()
-	print(video_file, subtitle_file, external, track_no, audio_track_no)
-
-	local cmd = '~/bin/extract-dialogue' .. ' -i ' .. ("%q"):format(video_file) .. '  -a ' .. audio_track_no .. ' -k ' .. (start_time * 1000) .. ' -e ' .. (end_time  * 1000)
-	if external then
-		cmd = cmd .. ' -s ' .. ("%q"):format(subtitle_file)
-	else
-		if track_no ~= nil then
-			cmd = cmd ..  ' -s ' ..track_no
-		end
-	end
-	print(cmd)
-
-	subs = my_popen(cmd, "<br>")
-	print(subs)
-
-	local new_name = "mpvcreate" .. os.time() .. ".mp3"
-	my_popen('mv output.mp3 \'' .. collection .. new_name .. '\'', "") -- seriously?
-
-	req  = {
-		action = "findNotes",
-		version = 6,
-		params = { query = "\"deck:" .. deck_name .. "\" added:1 is:new" }
+	local cmd = {
+		'run',
+		'mpv',
+		source,
+		'--loop-file=no',
+		'--video=no',
+		'--no-ocopy-metadata',
+		'--no-sub',
+		'--audio-channels=1',
+		string.format('--start=%.3f', s),
+		string.format('--length=%.3f', t),
+		string.format('--aid=%s', aid),
+		string.format('--af-append=afade=t=in:curve=ipar:st=%.3f:d=%.3f', s, AUDIO_CLIP_FADE),
+		string.format('--af-append=afade=t=out:curve=ipar:st=%.3f:d=%.3f', s + t - AUDIO_CLIP_FADE, AUDIO_CLIP_FADE),
+		string.format('-o=%s', destination)
 	}
-	resp, _, _ = http.request('http://127.0.0.1:8765/', json.encode(req))
-	val = json.decode(resp)
-	table.sort(val.result)
+	mp.commandv(unpack(cmd))
+end
 
-	req = {
-		action = "updateNoteFields",
-		version = 6,
-		params = {
-			note = {
-				id = val.result[#val.result],
-				fields = {
-					[sentence_field] = subs,
-					[audio_field] = "[sound:" .. new_name .. "]",
-				},
+
+local function create_screenshot(s, e)
+	local source = mp.get_property('path')
+	local img = utils.join_path(prefix, get_name(s,e) .. '.png')
+
+	local cmd = {
+		'run',
+		'mpv',
+		source,
+		'--loop-file=no',
+		'--audio=no',
+		'--no-ocopy-metadata',
+		'--no-sub',
+		'--frames=1',
+		'--vf-add=format=rgb24',
+		'--vf-add=scale=-2:480',
+		string.format('--start=%.3f', mp.get_property_number('time-pos')),
+		string.format('-o=%s', img)
+	}
+	mp.commandv(unpack(cmd))
+end
+
+local function anki_connect(action, params)
+	local req = utils.format_json({action=action, params=params, version=6})
+	local r, err = http.request(anki_address, req)
+	if not r then
+		msg.info(err)
+		error(string.format('\nError while processing request %s: %s\nCouldn\'t connect to anki-connect, either it isn\'t running, not installed, or anki isn\'t running', action, err))
+	end
+	return utils.parse_json(r)
+end
+
+local function get_card()
+	local res = anki_connect('findNotes', { query = 'added:1 is:new' })
+	if res.error then error(string.format('\nget_card: %s', res.error)) end
+
+	local cards = res.result
+	if #cards == 0 then error('\nget_card: No new cards found') end
+
+	table.sort(cards)
+	return cards[#cards]
+end
+
+local function update_card(c, s, e)
+	local x = anki_connect('updateNoteFields', {
+		note = {
+			id = c,
+			fields = {
+				[AUDIO_FIELD] = '[sound:' .. get_name(s, e) .. '.mp3]',
+				[IMAGE_FIELD] = '<img src='.. get_name(s,e) ..'.png' .. '>'
 			}
 		}
-	}
-	-- print(json.encode(req))
-	b, _, _ = http.request('http://127.0.0.1:8765/', json.encode(req))
-	print(b)
+	})
+	if x.error then error(string.format('\nupdate_card, updatenotefields: %s', x.error)) end
 
-	req = {
-		action = "addTags",
-		version = 6,
-		params = { notes = { val.result[#val.result] }, tags = "mpv-create" }
-	}
-	http.request('http://127.0.0.1:8765/', json.encode(req))
+	local y = anki_connect('addTags', {notes = {c}, tags = 'mpv-create'})
+	if y.error then msg.warning(string.format('update_card, addtags: %s', y.error)) end
 end
 
+local s = 0
+local e = 0
 
--- SERIOUSLY?
-function save_clip()
-	local video_file, subtitle_file, _, _, _ = get_source()
-	local new_name = "mpv-clip-" .. os.time() .. ".mp4"
-	if subtitle_file then
-		my_popen('ln -s ' .. ("%q"):format(subtitle_file) .. ' sub_file', "")
-	end
+local function run()
+	if s >= e then error('\nstart >= end') end
+	if e - s < 1 then error('\nend - start < 1') end
+	-- ^ not really needed i don't think, also i guess i can delete the if above it if i have this one
 
-	my_popen('ffmpeg -v fatal -ss ' .. start_time  .. ' -to ' .. end_time .. " -copyts -i " .. ("%q"):format(video_file)  .. " -vf subtitles=sub_file -reset_timestamps 1 " .. new_name, "")
-	if subtitle_file then
-		my_popen('rm sub_file', "")
-	end
-	mp.osd_message('Clip: ' .. new_name)
+	local c = get_card() -- if there are no new cards, end execution early
+	create_audio(s, e)
+	create_screenshot(s, e)
+	update_card(c, s, e)
+
+	s = 0
+	e = 0
 end
 
-mp.add_forced_key_binding('ctrl+n', 'sub-start', set_start)
-mp.add_forced_key_binding('ctrl+t', 'sub-end',  set_end)
-mp.add_forced_key_binding('ctrl+h', 'create-card', create_card)
-mp.add_forced_key_binding('ctrl+s', 'save-clip', save_clip)
+local function cleanup()
+	os.execute('sleep 1') -- have to wait a second otherwise the files don't get written for some reason? also lua doesn't have a sleep function? wtf?
+
+	local audio = utils.join_path(prefix, get_name(s,e) .. '.mp3')
+	local png = utils.join_path(prefix, get_name(s,e) .. '.png')
+	local args = { 'rm' }
+
+	if utils.file_info(audio) then table.insert(args, audio) end
+	if utils.file_info(png)   then table.insert(args, png)   end
+
+	if #args > 1 then utils.subprocess({ args = args }) end
+end
+
+local function ex()
+	local status, ret = pcall(run)
+	if not status then
+		mp.osd_message(ret, 10)
+		cleanup()
+		msg.info('finished cleaning up')
+	end
+end
+
+local function s_m(s)
+	local hours = math.floor((s % 86400) / 3600)
+	local minutes = math.floor((s % 3600) / 60)
+	local seconds = math.floor((s % 60))
+	return string.format('%02d:%02d:%02d', hours, minutes, seconds)
+end
+
+local function set_start()
+	s = mp.get_property_native('time-pos')
+	mp.osd_message('Start: ' .. s_m(s))
+end
+
+local function set_end()
+	e = mp.get_property_native('time-pos')
+	mp.osd_message('End: ' .. s_m(e))
+end
+
+local function view() mp.osd_message(string.format('Start: %s\n End: %s', s_m(s), s_m(e))) end
+
+mp.add_forced_key_binding('ctrl+n', 'create-card', ex)
+mp.add_forced_key_binding('ctrl+s', 'sub-start', set_start)
+mp.add_forced_key_binding('ctrl+e', 'sub-end',  set_end)
+mp.add_forced_key_binding('ctrl+q', 'view',  view)
