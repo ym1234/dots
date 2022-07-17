@@ -8,6 +8,7 @@ wineserver -p
 if ! pgrep -u "$USER" ssh-agent > /dev/null; then
     ssh-agent -t 24h > "$XDG_RUNTIME_DIR/ssh-agent.env"
 fi
+source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
 
 alias pkexec='pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY'
 source ~/.bashrc
