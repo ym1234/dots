@@ -20,6 +20,8 @@ local AUDIO_CLIP_PADDING = 0.75
 local IMAGE_FIELD = 'Image'
 local AUDIO_FIELD = 'Audio'
 
+if unpack ~= nil then table.unpack = unpack end
+
 -- get_name, create_audio, create_screenshot are from animecard.lua
 local function get_name(s, e)
 	return mp.get_property('filename'):gsub('%W','') .. tostring(s) .. tostring(e)
@@ -30,10 +32,6 @@ local function create_audio(s, e)
 		return
 	end
 
-	local name = get_name(s, e)
-	local destination = utils.join_path(prefix, name .. '.mp3')
-	s = s - AUDIO_CLIP_PADDING
-	local t = e - s + AUDIO_CLIP_PADDING
 	local source = mp.get_property('path')
 	local aid = mp.get_property('aid')
 
@@ -50,6 +48,9 @@ local function create_audio(s, e)
 		end
 	end
 
+	local destination = utils.join_path(prefix, get_name(s, e) .. '.mp3')
+	s = s - AUDIO_CLIP_PADDING
+	local t = e - s + AUDIO_CLIP_PADDING
 
 	local cmd = {
 		'run',
@@ -67,7 +68,7 @@ local function create_audio(s, e)
 		string.format('--af-append=afade=t=out:curve=ipar:st=%.3f:d=%.3f', s + t - AUDIO_CLIP_FADE, AUDIO_CLIP_FADE),
 		string.format('-o=%s', destination)
 	}
-	mp.commandv(unpack(cmd))
+	mp.commandv(table.unpack(cmd))
 end
 
 
@@ -89,7 +90,7 @@ local function create_screenshot(s, e)
 		string.format('--start=%.3f', mp.get_property_number('time-pos')),
 		string.format('-o=%s', img)
 	}
-	mp.commandv(unpack(cmd))
+	mp.commandv(table.unpack(cmd))
 end
 
 local function anki_connect(action, params)
@@ -119,7 +120,7 @@ local function update_card(c, s, e)
 			id = c,
 			fields = {
 				[AUDIO_FIELD] = '[sound:' .. get_name(s, e) .. '.mp3]',
-				[IMAGE_FIELD] = '<img src='.. get_name(s,e) ..'.png' .. '>'
+				[IMAGE_FIELD] = '<img src='.. get_name(s,e) ..'.png>'
 			}
 		}
 	})
@@ -177,19 +178,18 @@ local function s_m(s)
 	return string.format('%02d:%02d:%02d', hours, minutes, seconds)
 end
 
+local function view() mp.osd_message(string.format('Start: %s\n End: %s', s_m(s), s_m(e))) end
+
 local function set_start()
 	s = mp.get_property_native('time-pos')
-	mp.osd_message('Start: ' .. s_m(s))
+	view()
 end
 
 local function set_end()
 	e = mp.get_property_native('time-pos')
-	mp.osd_message('End: ' .. s_m(e))
+	view()
 end
-
-local function view() mp.osd_message(string.format('Start: %s\n End: %s', s_m(s), s_m(e))) end
 
 mp.add_forced_key_binding('ctrl+n', 'create-card', ex)
 mp.add_forced_key_binding('ctrl+s', 'sub-start', set_start)
 mp.add_forced_key_binding('ctrl+e', 'sub-end',  set_end)
-mp.add_forced_key_binding('ctrl+q', 'view',  view)
