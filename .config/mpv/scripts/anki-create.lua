@@ -60,7 +60,7 @@ local function create_audio(s, e)
 		'--video=no',
 		'--no-ocopy-metadata',
 		'--no-sub',
-		'--audio-channels=1',
+		'--audio-channels=2',
 		string.format('--start=%.3f', s),
 		string.format('--length=%.3f', t),
 		string.format('--aid=%s', aid),
