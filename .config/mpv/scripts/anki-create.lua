@@ -17,6 +17,7 @@ local prefix = utils.join_path(os.getenv('HOME'), [[.local/share/Anki2/User 1/co
 local AUDIO_CLIP_FADE = 0.2
 local AUDIO_CLIP_PADDING = 0.75
 
+local FRONT_FIELD =  'Word'
 local IMAGE_FIELD = 'Image'
 local AUDIO_FIELD = 'Audio'
 
@@ -70,7 +71,6 @@ local function create_audio(s, e)
 	}
 	mp.commandv(table.unpack(cmd))
 end
-
 
 local function create_screenshot(s, e)
 	local source = mp.get_property('path')
@@ -145,6 +145,7 @@ local function run()
 
 	s = 0
 	e = 0
+	return c
 end
 
 local function cleanup()
@@ -167,7 +168,12 @@ local function ex()
 		cleanup()
 		msg.info('finished cleaning up')
 	else
-		mp.osd_message("updated card", 5)
+		local note = anki_connect('notesInfo', {notes={ret}})
+		if note.err then
+			mp.osd_message('Updated note, but couldn\'t retrive its contents')
+		else
+			mp.osd_message('Updated note: ' .. note.result[1].fields[FRONT_FIELD].value, 5)
+		end
 	end
 end
 
