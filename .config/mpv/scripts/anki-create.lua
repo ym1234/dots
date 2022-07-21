@@ -14,6 +14,8 @@ local anki_address = 'http://127.0.0.1:8765/'
 local deck = '07. 日本語::Anime cards'
 local prefix = utils.join_path(os.getenv('HOME'), [[.local/share/Anki2/User 1/collection.media]])
 
+local CLIP_FOLDER = '/home/ym//Media/Clips/'
+
 local AUDIO_CLIP_FADE = 0.2
 local AUDIO_CLIP_PADDING = 0.75
 
@@ -41,6 +43,7 @@ local function create_audio(s, e)
 		local track_type = mp.get_property(string.format('track-list/%d/type', i))
 		local track_selected = mp.get_property(string.format('track-list/%d/selected', i))
 		if track_type == 'audio' and track_selected == 'yes' then
+			local o = {}
 			if mp.get_property(string.format('track-list/%d/external-filename', i), o) ~= o then
 				source = mp.get_property(string.format('track-list/%d/external-filename', i))
 				aid = 'auto'
@@ -70,6 +73,48 @@ local function create_audio(s, e)
 		string.format('-o=%s', destination)
 	}
 	mp.commandv(table.unpack(cmd))
+end
+
+-- TODO(ym): Deal with external audio files, sub files, whatever
+-- This is ~~kinda~~ unbearably slow
+local function create_clip(s, e)
+	local name = string.format("%s_%s.mkv", mp.get_property("filename/no-ext"), os.date("%Y.%m.%d_%H.%M.%S"))
+
+	local source = mp.get_property('path')
+	local aid = mp.get_property('aid')
+	local sid = mp.get_property('sid')
+
+	-- See the TODO above
+	-- local tracks_count = mp.get_property_number('track-list/count')
+	-- for i = 1, tracks_count do
+	-- 	local track_type = mp.get_property(string.format('track-list/%d/type', i))
+	-- 	local track_selected = mp.get_property(string.format('track-list/%d/selected', i))
+	-- 	if track_type == 'audio' and track_selected == 'yes' then
+	-- 		local o = {}
+	-- 		if mp.get_property(string.format('track-list/%d/external-filename', i), o) ~= o then
+	-- 			source = mp.get_property(string.format('track-list/%d/external-filename', i))
+	-- 			aid = 'auto'
+	-- 		end
+	-- 		break
+	-- 	end
+	-- end
+
+	s = s - AUDIO_CLIP_PADDING
+	local t = e - s + AUDIO_CLIP_PADDING
+
+	local cmd = {
+		'run',
+		'mpv',
+		source,
+		'--loop-file=no',
+		string.format('--aid=%s', aid),
+		string.format('--sid=%s', sid),
+		string.format('--start=%.3f', s),
+		string.format('--length=%.3f', t),
+		string.format('-o=%s', CLIP_FOLDER .. name)
+	}
+	mp.commandv(table.unpack(cmd))
+	return name
 end
 
 local function create_screenshot(s, e)
@@ -133,9 +178,9 @@ end
 local s = 0
 local e = 0
 
-local function run()
-	if s >= e then error('\nstart >= end') end
-	if e - s < 1 then error('\nend - start < 1') end
+local function anki()
+	if s >= e then error('\nStart >= End') end
+	if e - s < 1 then error('\nEnd - Start < 1') end
 	-- ^ not really needed i don't think, also i guess i can delete the if above it if i have this one
 
 	local c = get_card() -- if there are no new cards, end execution early
@@ -161,12 +206,12 @@ local function cleanup()
 	if #args > 1 then utils.subprocess({ args = args }) end
 end
 
-local function ex()
-	local status, ret = pcall(run)
+local function ex_card()
+	local status, ret = pcall(anki)
 	if not status then
 		mp.osd_message(ret, 10)
 		cleanup()
-		msg.info('finished cleaning up')
+		msg.info('Finished cleaning up')
 	else
 		local note = anki_connect('notesInfo', {notes={ret}})
 		if note.err then
@@ -175,6 +220,11 @@ local function ex()
 			mp.osd_message('Updated note: ' .. note.result[1].fields[FRONT_FIELD].value, 5)
 		end
 	end
+end
+
+local function ex_clip()
+	local clip = create_clip(s, e)
+	mp.osd_message("Saving clip: " .. CLIP_FOLDER .. clip)
 end
 
 local function s_m(s)
@@ -196,6 +246,7 @@ local function set_end()
 	view()
 end
 
-mp.add_forced_key_binding('ctrl+n', 'create-card', ex)
+mp.add_forced_key_binding('ctrl+c', 'create-clip', ex_clip)
+mp.add_forced_key_binding('ctrl+n', 'create-card', ex_card)
 mp.add_forced_key_binding('ctrl+s', 'sub-start', set_start)
 mp.add_forced_key_binding('ctrl+e', 'sub-end',  set_end)
