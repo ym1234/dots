@@ -1,0 +1,4 @@
+#!/bin/sh
+name=$1
+curl -sF"file=@$name" https://0x0.st |  xclip -sel clipboard -in
+notify-send -a "Uploaded: $i" "$(xclip -selection clipboard -out)"
