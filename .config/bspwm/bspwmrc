@@ -1,13 +1,15 @@
 #!/bin/sh
-oeoeoooea
 bspc monitor -d I II III IV V VI VII VIII IX X
 
 rules=(
 "Emacs state=tiled"
+"KeePassXC state=floating"
 "Sxiv state=floating"
+'"GNU Octave" state=floating'
 "mpv state=floating"
 "Zathura state=tiled"
 "retroarch state=floating"
+'*:*:Picture-in-Picture state=floating'
 )
 
 config=(
@@ -29,7 +31,9 @@ setroot -sc \#282A2E
 # setroot /home/ym/Media/Wallpapers/1546859319019.png
 
 amixer sset Master 100%
+
 xmodmap ~/.Xmodmap
-xcape -e "Hyper_L=Escape"
-chromium
+# These are getting too annoying
+# xcape -e "Hyper_L=Escape"
+firefox
 picom

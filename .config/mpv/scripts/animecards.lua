@@ -47,11 +47,11 @@ local WORD_AUDIO_FIELD = ""
 local AUTOPLAY_AUDIO = true
 -- Optional screenshot image format.
 -- Change to "jpeg" if you plan to view cards on iOS or Mac.
-local IMAGE_FORMAT = "png"
+local IMAGE_FORMAT = "jpeg"
 ---------------------------------------
 
 local subs = {}
-local enable_subs_to_clip = true
+local enable_subs_to_clip = false
 local debug_mode = true
 local use_powershell_clipboard = nil
 
@@ -210,7 +210,7 @@ local function create_audio(s, e)
   end
 
   local name = get_name(s, e)
-  local destination = utils.join_path(prefix, name .. '.mp3')
+  local destination = utils.join_path(prefix, name .. '.opus')
   s = s - AUDIO_CLIP_PADDING
   local t = e - s + AUDIO_CLIP_PADDING
   local source = mp.get_property("path")
@@ -272,7 +272,8 @@ local function create_screenshot(s, e)
   elseif IMAGE_FORMAT == 'png' then
     table.insert(cmd, '--vf-add=format=rgb24')
   end
-  table.insert(cmd, '--vf-add=scale=-2:480')
+  table.insert(cmd, '--vf-add=scale=out_color_matrix=bt601:-2:480:out_range=pc') -- fix for jpegs
+
   table.insert(cmd, string.format('--start=%.3f', mp.get_property_number("time-pos")))
   table.insert(cmd, string.format('-o=%s', img))
   mp.commandv(table.unpack(cmd))

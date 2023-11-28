@@ -44,4 +44,4 @@ endfunction
 
 autocmd Filetype c nnoremap <buffer> gd :Cscope 1<CR>
 autocmd Filetype c nnoremap <buffer> <leader>a :FS<CR>
-setlocal cscopeverbose cscopetag
+" setlocal cscopeverbose cscopetag

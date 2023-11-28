@@ -13,6 +13,16 @@ let g:enable_italic_font = 1
 " Vim Plugins {{{
 " NOTE: Indented for easier management with vim-textobj-indent
 call plug#begin('~/.config/nvim/plugins/')
+
+  " Plug 'github/copilot.vim', {'branch': 'release'}
+	Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+  Plug 'editorconfig/editorconfig-vim'
+	Plug 'nvim-lua/plenary.nvim'
+	Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'branch': 'main', 'do': 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
+
+	Plug 'lewis6991/gitsigns.nvim', {'branch': 'main'}
+
 	Plug 'ActivityWatch/aw-watcher-vim'
 	Plug  'Vigemus/iron.nvim'
 	Plug  'qpkorr/vim-renamer'
@@ -28,12 +38,13 @@ call plug#begin('~/.config/nvim/plugins/')
 	Plug 'bogado/file-line'
 
     Plug 'airblade/vim-rooter'
-    Plug 'chrisbra/Colorizer'
+    " Plug 'chrisbra/Colorizer'
+    Plug 'powerman/vim-plugin-AnsiEsc'
 
     Plug 'itchyny/lightline.vim'
 	" Plug $HOME . '/Projects/vim-hour'
     Plug $HOME . '/Projects/fzf'
-	Plug $HOME . '/Projects/vim-search'
+    Plug $HOME . '/Projects/vim-search'
 
     Plug 'junegunn/fzf.vim'
     Plug 'junegunn/vim-easy-align'
@@ -55,7 +66,7 @@ call plug#begin('~/.config/nvim/plugins/')
     Plug 'glts/vim-textobj-comment'
     Plug 'tpope/vim-endwise'
 
-    Plug 'ym1234/vim-fswitch', { 'for': [ 'c', 'cpp' ] }
+    " Plug 'ym1234/vim-fswitch', { 'for': [ 'c', 'cpp' ] }
     " Plug 'junegunn/vim-slash'
 
     Plug 'tpope/vim-eunuch'
@@ -77,7 +88,7 @@ call plug#begin('~/.config/nvim/plugins/')
 	" Plug 'w0rp/ale'
 	Plug 'ndmitchell/ghcid', { 'rtp': 'plugins/nvim' }
 
-    Plug 'sheerun/vim-polyglot'
+    " Plug 'sheerun/vim-polyglot'
     " Plug 'autozimu/LanguageClient-neovim', {  'branch': 'next',  'do': './install.sh' }
 	" Plug 'solderneer/lightline-languageclient'
 call plug#end()
@@ -87,9 +98,64 @@ call plug#end()
 
 colorscheme hybrid_reverse
 
-luafile $HOME/.config/nvim/plugins.lua
+" lua << EOF
+"   require('telescope').setup {
+"       defaults = {
+"           vimgrep_arguments = {
+"               'rg',
+"               '--no-heading',
+"               '--with-filename',
+"               '--line-number',
+"               '--column',
+"               '--smart-case'
+"               },
+"           prompt_prefix = "> ",
+"           selection_caret = "> ",
+"           entry_prefix = "  ",
+"           initial_mode = "insert",
+"           selection_strategy = "reset",
+"           sorting_strategy = "descending",
+"           layout_strategy = "horizontal",
+"           layout_config = {
+"               horizontal = {mirror = false},
+"               vertical = {mirror = false}
+"               },
+"           file_sorter = require'telescope.sorters'.get_fuzzy_file,
+"           file_ignore_patterns = {
+"               '.git',
+"               '__pycache__'
+"               },
+"           generic_sorter = require'telescope.sorters'.get_generic_fuzzy_sorter,
+"           path_display = {},
+"           winblend = 0,
+"           border = {},
+"           borderchars = {'─', '│', '─', '│', '╭', '╮', '╯', '╰'},
+"           color_devicons = true,
+"           use_less = true,
+"           set_env = {['COLORTERM'] = 'truecolor'}, -- default = nil,
+"           file_previewer = require'telescope.previewers'.vim_buffer_cat.new,
+"           grep_previewer = require'telescope.previewers'.vim_buffer_vimgrep.new,
+"           qflist_previewer = require'telescope.previewers'.vim_buffer_qflist.new,
 
-set cursorline nojoinspaces nostartofline breakindent notimeout nottimeout hidden autowrite autoread nowritebackup nobackup noswapfile undofile noshowmode noequalalways shiftwidth=4 noexpandtab tabstop=4 autoindent hlsearch incsearch smartcase completeopt-=preview ignorecase splitbelow splitright lazyredraw termguicolors " TODO(ym): reset this
+"           -- Developer configurations: Not meant for general override
+"           buffer_previewer_maker = require'telescope.previewers'.buffer_previewer_maker,
+"       },
+"       extensions = {
+"           fzf = {
+"               fuzzy = true,                    -- false will only do exact matching
+"               override_generic_sorter = true,  -- override the generic sorter
+"               override_file_sorter = true,     -- override the file sorter
+"               case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+"               -- the default case_mode is "smart_case"
+"               }
+"           }
+"   }
+
+"   require'telescope'.load_extension('fzf')
+" -- require('telescope').load_extension('fzf')
+" EOF
+
+set cursorline nojoinspaces nostartofline breakindent notimeout nottimeout hidden autowrite autoread nowritebackup nobackup noswapfile undofile noshowmode noequalalways shiftwidth=2 expandtab tabstop=2 autoindent hlsearch incsearch smartcase completeopt-=preview ignorecase splitbelow splitright lazyredraw termguicolors
 set pumheight=10 background=dark spelllang=en_us cino=l1 inccommand=nosplit updatetime=50 undolevels=10000 cmdheight=1 diffopt+=vertical tabpagemax=10 history=1000 undodir=~/.config/nvim/tmp/undo listchars=tab:▸\ ,trail:·,eol:¬,nbsp:_ grepprg=rg\ --vimgrep\ --color=never mouse=a
 
 let mapleader = "\<Space>"
@@ -204,8 +270,9 @@ let b:exchange_indent = 1
 let g:windowswap_map_keys = 0
 let g:ProportionalResize_UpdateTime = 5
 
-let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6, 'highlight': 'Todo', 'border': 'sharp' } }
-" let g:fzf_layout = { 'up': '~20%' }
+" let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6, 'highlight': 'Todo', 'border': 'sharp' } }
+" let g:fzf_layout = { 'down': '40%' }
+let g:fzf_layout = { 'up': '~20%' }
 let g:fzf_action = {
 			\ 'ctrl-t': 'tab split',
 			\ 'ctrl-x': 'split',
@@ -304,7 +371,7 @@ autocmd FocusLost * silent! wa
 " autocmd FileType * call LC_maps()
 
 autocmd VimResized * redraw!
-autocmd BufNewFile,BufRead *.hs setlocal tabstop=8 expandtab softtabstop=2 shiftwidth=2 shiftround nosmartindent
+" autocmd BufNewFile,BufRead *.hs setlocal tabstop=8 expandtab softtabstop=2 shiftwidth=2 shiftround nosmartindent
 
 func! Whatever()
 	let path = expand('%:p:r')
@@ -451,6 +518,9 @@ nnoremap <Leader>oh :FZF<Space>
 nnoremap <Leader>oc :Commits<CR>
 nnoremap <Leader>oC :BCommits<CR>
 nnoremap <Leader>oH :History<CR>
+" nnoremap <Leader>. :Telescope find_files<CR>
+" nnoremap <Leader>b :Telescope buffers<CR>
+" nnoremap <Leader>m :Telescope man_pages sections=ALL<CR>
 
 nnoremap <silent><Leader>se :vsp $MYVIMRC<CR>
 nnoremap <silent><Leader>sv :source $MYVIMRC<CR>:noh<CR>
@@ -538,8 +608,8 @@ nnoremap S :<C-r>=v:count == 0 ? "%" : ""<CR>s//g<Left><Left>
 
 " Is ga good? its default behaviour was pretty nice tbh but i didn't use it
 " often
-xmap ga <Plug>(EasyAlign)
-nmap ga <Plug>(EasyAlign)
+" xmap ga <Plug>(EasyAlign)
+" nmap ga <Plug>(EasyAlign)
 
 nnoremap <Leader>ae mavap:EasyAlign = <CR>`a
 nnoremap <Leader>at mavap:EasyAlign *\|<CR>`a

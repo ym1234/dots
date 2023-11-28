@@ -1,6 +1,6 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
-PS1="\[\033[01;31m\]\h \[\033[0m\]:: \[\033[00;34m\]\W \[\033[0m\]= "
+PS1="\[\033[01;31m\]\h \[\033[0m\]:: \[\033[00;34m\]\W \[\033[0m\]= "
 
 export GOPATH="/home/ym/Drive/Projects/Go/"
 export CARGO_HOME="$HOME/.local/share/cargo"
@@ -8,6 +8,7 @@ export RUSTUP_HOME="$HOME/.local/share/rustup"
 export DIRENV_LOG_FORMAT=
 export WINEPREFIX="$HOME/Drive2/.wine32"
 
+export DISABLE_QT5_COMPAT=1
 export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
 export XDG_DESKTOP_DIR="/tmp"
 export _Z_DATA="$HOME/.config/fasd/database"
@@ -21,14 +22,17 @@ export MANPAGER='nvim +Man!'
 export RIPGREP_CONFIG_PATH="$HOME/.config/rg/config"
 
 export FZF_DEFAULT_COMMAND="rg --no-pcre2-unicode --no-config --files --no-messages --no-ignore --hidden --follow -g '!{.git,.cache}'"
-export FZF_DEFAULT_OPTS="--reverse --inline-info --preview='~/bin/preview.sh {}' --bind '?:toggle-preview' --tabstop=1 --ansi"
+# export FZF_DEFAULT_OPTS="--reverse --inline-info --preview='~/bin/preview.sh {}' --bind '?:toggle-preview' --tabstop=1 --ansi"
+export FZF_DEFAULT_OPTS="--inline-info --preview='~/bin/preview.sh {}' --bind '?:toggle-preview' --tabstop=1 --ansi"
 export LESSHISTFILE=-
 export WEECHAT_HOME="~/.config/weechat/"
 export _JAVA_AWT_WM_NONREPARENTING=1
+export DRI_PRIME=0
 alias pkexec='pkexec env HOME=/home/ym/ DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY'
 
 shopt -s globstar extglob
 
+alias info='info --vi-keys'
 alias watch_vcd='mpv "-af=channelmap=1-0"'
 alias lorw='lorri watch > /tmp/lorri_out 2>&1 & '
 alias loli='tail -n 11 /tmp/lorri_out'
@@ -73,8 +77,10 @@ alias gp='git push'
 alias gaa='git add -A'
 alias gup='gaa; gc; gp'
 
+alias pwndbg='gdb --eval="source /usr/share/pwndbg/gdbinit.py"'
+
 alias cfg='git --git-dir=$HOME/Documents/dots/ --work-tree=$HOME'
-alias orphan='sudo pacman -Rncs $(pacman -Qtdq)'
+alias orphan='sudo yay -Rncs $(yay -Qtdq)'
 alias py='python'
 
 alias o='a -e xdg-open'
@@ -83,6 +89,8 @@ alias less='less -r'
 alias mount='sudo mount'
 alias umount='sudo umount'
 alias fuckingwindows="find . -type f -execdir dos2unix {} \;"
+
+alias diskspace='ncdu --exclude Drive --exclude Drive2 --exclude Drive3 --exclude SSD --exclude /dev --exclude /tmp --exclude /proc --exclude /var --exclude /boot --exclude /run /'
 
 recaudio() {
 	sink="$(pacmd stat | awk -F": " '/^Default sink name: /{print $2}')"
@@ -190,7 +198,7 @@ sxiv() {
 	command sxiv -ar $args & disown
 }
 
-stty -ixon # dont freeze the shel when c-s is pressed
+stty -ixon # dont freeze the shell when c-s is pressed
 # sudo rmmod pcspkr
 if [[  "$TERM" = "linux" ]]; then
 	echo -en "\e]P01D1F21" # black
@@ -217,8 +225,8 @@ for i in ~/Projects/fzf/shell/*.bash; do . "$i"; done
 # . /home/ym/.nix-profile/etc/profile.d/nix.sh # Sourced in .bash_profile too, maybe i should remove this?
 # eval "$(fasd --init auto)"
 eval "$(direnv hook bash)"
-# [[ -r "/usr/share/z/z.sh" ]] && source /usr/share/z/z.sh
-[[ -r "/usr/share/z.lua/z.lua" ]] && eval "$(luajit /usr/share/z.lua/z.lua --init bash enhanced once echo fzf)"
+[[ -r "/usr/share/z/z.sh" ]] && source /usr/share/z/z.sh
+# [[ -r "/usr/share/z.lua/z.lua" ]] && eval "$(luajit /usr/share/z.lua/z.lua --init bash enhanced once echo fzf)"
 # eval "$(zoxide init bash)"
 
-[[ ! $DISPLAY && $XDG_VTNR == 1 ]] && startx
+[[ ! $DISPLAY && $XDG_VTNR == 1 ]] && exec startx &> /dev/null

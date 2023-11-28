@@ -6,5 +6,7 @@ case $1 in
 	*)
 		shotgun "$name" ;;
 esac
-curl -sF"file=@$name" https://0x0.st | sed 's/.st/.arikawa-hi.me/' | xclip -sel clipboard -in
+# curl -sF"file=@$name" https://c-v.sh | cut -d " " -f1 |  xclip -sel clipboard -in
+curl -sF"file=@$name" https://0x0.st |  xclip -sel clipboard -in
 notify-send -a "Screenshot" "$(xclip -selection clipboard -out)"
+# notify-send -a "Screenshot" "$name"

@@ -8,7 +8,11 @@ TMPDIR="${TMPDIR:-/tmp}"
 [[ ! -f $TMPDIR/record ]] && touch $TMPDIR/record
 pid="$(< $TMPDIR/record)"
 if [[ -d /proc/"$pid/fd" ]]; then
-	name="$(< '/tmp/record_name')"
+	wavname="$(< '/tmp/record_name')"
+  name="${wavname%.*}.opus"
+
+  # make  sure everything has been written
+	sleep 2
 
 	kill -s 2 "$pid"
 	rm "$TMPDIR/record"
@@ -16,6 +20,8 @@ if [[ -d /proc/"$pid/fd" ]]; then
 
 	# wait for ffmpeg to finish writing the file and exiting
 	sleep 0.5
+
+  ffmpeg -i "$TMPDIR/$wavname" -c:a libopus -b:a 96K "$TMPDIR/$name"
 
 	mv "$TMPDIR/$name" "/home/ym/.local/share/Anki2/User 1/collection.media/"
 	clipboard="$(jq -aRs . <<< "$((xclip -selection clipboard -o; echo) | while read -r line; do echo -n "$line<br>"; done)")"
@@ -36,6 +42,9 @@ EOF
 resp="$(curl --silent -H "Content-Type: application/json" --data @/tmp/req 'http://127.0.0.1:8765/')"
 note_id="$(echo "$resp" | jq  ".result | sort | last")"
 echo "$note_id"
+
+
+# TODO(YM): /tmp/req -> $TMPDIR/<some unique name>
 
 cat << EOF > /tmp/req
 {
@@ -68,8 +77,10 @@ cat << EOF > /tmp/req
 EOF
 	resp="$(curl --silent -H "Content-Type: application/json" --data @/tmp/req 'http://127.0.0.1:8765/')"
 	rm /tmp/req
+  rm "$TMPDIR/$wavname"
 	echo "$resp"
 	notify-send -a "Finished recording" "$resp"
+
 else
 	name="$(date +'%F%H%M%S').wav"
 	pacat --record -d "$(pacmd stat | awk -F": " '/^Default sink name: /{print $2}').monitor" --file-format=wav "$TMPDIR/$name" > /dev/null 2>&1 & disown

@@ -44,10 +44,11 @@ end
 
 local skipped = {}
 local parsed = {}
+local on = true
 
 function chapterskip(_, current)
     mp.options.read_options(options, "chapterskip")
-    if not options.enabled then return end
+    if not options.enabled or not on then return end
     for category in string.gmatch(options.categories, "([^;]+)") do
         name, patterns = string.match(category, " *([^+>]*[^+> ]) *[+>](.*)")
         if name then
@@ -81,5 +82,16 @@ function chapterskip(_, current)
     end
 end
 
+function toggle()
+    on = not on
+    if on then
+        mp.osd_message("Chapter skipping on")
+    else
+        mp.osd_message("Chapter skipping off")
+    end
+end
+
 mp.observe_property("chapter", "number", chapterskip)
 mp.register_event("file-loaded", function() skipped = {} end)
+mp.add_forced_key_binding('ctrl+j', 'chapterskiptoggle', toggle)
+mp.add_forced_key_binding('ctrl+k', 'autoskipthis', toggle)

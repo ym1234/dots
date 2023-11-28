@@ -1,7 +1,9 @@
 # Japanese input
-export GTK_IM_MODULE=fcitx5
-export QT_IM_MODULE=fcitx5
-export XMODIFIERS=@im=fcitx5
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx
+export SDL_IM_MODULE=fcitx
+export GLFW_IM_MODULE=fcitx
 
 wineserver -p
 
@@ -14,3 +16,9 @@ alias pkexec='pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY'
 source ~/.bashrc
 
 if [ -e /home/ym/.nix-profile/etc/profile.d/nix.sh ]; then . /home/ym/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
+
+export GUIX_PROFILE="/home/ym/.config/guix/current"
+. "$GUIX_PROFILE/etc/profile"
+export PATH="$PATH:/home/ym/.config/guix/current/bin"
+
+# TORCH=1 pytest test/external/external_test_onnx_backend.py

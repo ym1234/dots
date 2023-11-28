@@ -19,7 +19,7 @@ local CLIP_FOLDER = '/home/ym//Media/Clips/'
 local AUDIO_CLIP_FADE = 0.2
 local AUDIO_CLIP_PADDING = 0.75
 
-local FRONT_FIELD =  'Word'
+local FRONT_FIELD = 'Word'
 local IMAGE_FIELD = 'Image'
 local AUDIO_FIELD = 'Audio'
 
@@ -31,10 +31,6 @@ local function get_name(s, e)
 end
 
 local function create_audio(s, e)
-	if s == nil or e == nil then
-		return
-	end
-
 	local source = mp.get_property('path')
 	local aid = mp.get_property('aid')
 
@@ -52,9 +48,15 @@ local function create_audio(s, e)
 		end
 	end
 
-	local destination = utils.join_path(prefix, get_name(s, e) .. '.mp3')
+	local destination = utils.join_path(prefix, get_name(s, e) .. '.opus')
 	s = s - AUDIO_CLIP_PADDING
+	if s <= 0 then
+		s = 0
+	end
 	local t = e - s + AUDIO_CLIP_PADDING
+	if t <= 0 then
+		t = 2
+	end
 
 	local cmd = {
 		'run',
@@ -78,7 +80,7 @@ end
 -- TODO(ym): Deal with external audio files, sub files, whatever
 -- This is ~~kinda~~ unbearably slow
 local function create_clip(s, e)
-	local name = string.format("%s_%s.mkv", mp.get_property("filename/no-ext"), os.date("%Y.%m.%d_%H.%M.%S"))
+	local name = string.format("%s_%s.mp4", mp.get_property("filename/no-ext"), os.date("%Y.%m.%d_%H.%M.%S"))
 
 	local source = mp.get_property('path')
 	local aid = mp.get_property('aid')
@@ -99,8 +101,13 @@ local function create_clip(s, e)
 	-- 	end
 	-- end
 
-	s = s - AUDIO_CLIP_PADDING
-	local t = e - s + AUDIO_CLIP_PADDING
+	-- Clips don't need padding
+	-- s = s - AUDIO_CLIP_PADDING
+	-- local t = e - s + AUDIO_CLIP_PADDING
+	if s <= 0 then
+		s = 0
+	end
+	local t = e - s
 
 	local cmd = {
 		'run',
@@ -119,7 +126,7 @@ end
 
 local function create_screenshot(s, e)
 	local source = mp.get_property('path')
-	local img = utils.join_path(prefix, get_name(s,e) .. '.png')
+	local img = utils.join_path(prefix, get_name(s,e) .. '.jpeg')
 
 	local cmd = {
 		'run',
@@ -130,8 +137,8 @@ local function create_screenshot(s, e)
 		'--no-ocopy-metadata',
 		'--no-sub',
 		'--frames=1',
-		'--vf-add=format=rgb24',
-		'--vf-add=scale=-2:480',
+		-- '--vf-add=format=rgb24', -- only for pngs in the animecards script
+		'--vf-add=scale=out_color_matrix=bt601:-2:480:out_range=pc',
 		string.format('--start=%.3f', mp.get_property_number('time-pos')),
 		string.format('-o=%s', img)
 	}
@@ -143,7 +150,7 @@ local function anki_connect(action, params)
 	local r, err = http.request(anki_address, req)
 	if not r then
 		msg.info(err)
-		error(string.format('\nError while processing request %s: %s\nCouldn\'t connect to anki-connect, either it isn\'t running, not installed, or anki isn\'t running', action, err))
+		error(string.format("\nError while processing request %s: %s\nCouldn't connect to anki-connect, either it isn't running, not installed, or anki isn't running", action, err))
 	end
 	return utils.parse_json(r)
 end
@@ -164,8 +171,8 @@ local function update_card(c, s, e)
 		note = {
 			id = c,
 			fields = {
-				[AUDIO_FIELD] = '[sound:' .. get_name(s, e) .. '.mp3]',
-				[IMAGE_FIELD] = '<img src='.. get_name(s,e) ..'.png>'
+				[AUDIO_FIELD] = '[sound:' .. get_name(s, e) .. '.opus]',
+				[IMAGE_FIELD] = '<img src='.. get_name(s,e) ..'.jpeg>'
 			}
 		}
 	})
@@ -196,10 +203,10 @@ end
 local function cleanup()
 	os.execute('sleep 1') -- have to wait a second otherwise the files don't get written for some reason? also lua doesn't have a sleep function? wtf?
 
-	local audio = utils.join_path(prefix, get_name(s,e) .. '.mp3')
-	local png = utils.join_path(prefix, get_name(s,e) .. '.png')
-	local args = { 'rm' }
+	local audio = utils.join_path(prefix, get_name(s, e) .. '.opus')
+	local png = utils.join_path(prefix, get_name(s, e) .. '.jpeg')
 
+	local args = { 'rm' }
 	if utils.file_info(audio) then table.insert(args, audio) end
 	if utils.file_info(png)   then table.insert(args, png)   end
 
@@ -212,13 +219,14 @@ local function ex_card()
 		mp.osd_message(ret, 10)
 		cleanup()
 		msg.info('Finished cleaning up')
+		return
+	end
+
+	local note = anki_connect('notesInfo', {notes={ret}})
+	if note.err then
+		mp.osd_message('Updated note, but couldn\'t retrive its contents')
 	else
-		local note = anki_connect('notesInfo', {notes={ret}})
-		if note.err then
-			mp.osd_message('Updated note, but couldn\'t retrive its contents')
-		else
-			mp.osd_message('Updated note: ' .. note.result[1].fields[FRONT_FIELD].value, 5)
-		end
+		mp.osd_message('Updated note: ' .. note.result[1].fields[FRONT_FIELD].value, 5)
 	end
 end
 
@@ -246,7 +254,26 @@ local function set_end()
 	view()
 end
 
+local function set_sub_delay()
+  local playback_time = mp.get_property_native("playback-time")
+  	-- local sub_delay = mp.get_property_native("sub-delay")
+	mp.set_property_native("sub-delay", playback_time)
+end
+
+local function set_sub_delay2()
+  local playback_time = mp.get_property_native("playback-time")
+  	-- local sub_delay = mp.get_property_native("sub-delay")
+	mp.set_property_native("sub-delay", -playback_time)
+end
+
+local function remove_delay()
+	mp.set_property_native('sub-delay', 0)
+end
+
 mp.add_forced_key_binding('ctrl+c', 'create-clip', ex_clip)
 mp.add_forced_key_binding('ctrl+n', 'create-card', ex_card)
 mp.add_forced_key_binding('ctrl+s', 'sub-start', set_start)
 mp.add_forced_key_binding('ctrl+e', 'sub-end',  set_end)
+mp.add_forced_key_binding('ctrl+a', 'hmm', set_sub_delay)
+mp.add_forced_key_binding('ctrl+b', 'hmm3', set_sub_delay2)
+mp.add_forced_key_binding("ctrl+l", 'hmm2', remove_delay)

@@ -1,8 +1,8 @@
 --glob
 !{tags,.git,.cache}
 
---color
-always
+# --color
+# always
 
 --colors
 match:style:nobold
