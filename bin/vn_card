@@ -83,11 +83,29 @@ EOF
 
 else
 	name="$(date +'%F%H%M%S').wav"
-	pacat --record -d "$(pacmd stat | awk -F": " '/^Default sink name: /{print $2}').monitor" --file-format=wav "$TMPDIR/$name" > /dev/null 2>&1 & disown
+	pacat --record --file-format=wav "$TMPDIR/$name" > "$TMPDIR/${name}_log" 2>&1 & disown
+  ptpid=$!
+  sleep 0.1
+  kill -0 $ptpid &> /dev/null
+  if [[ $? -ge 1 ]]; then
+    rm "$TMPDIR/$name"
+    notify-send -a "vn_card: error" "failed to run!!, enabling pipewire-pulse and retrying"
+    systemctl start --user pipewire
+    systemctl start --user pipewire-pulse
+    pacat --record --file-format=wav "$TMPDIR/$name" > "$TMPDIR/${name}_log" 2>&1 & disown
+    ptpid=$!
+    sleep 0.1
+    kill -0 $ptpid &> /dev/null
+    if [[ $? -ge 1 ]]; then
+      rm "$TMPDIR/$name"
+      notify-send -a "vn_card: error" "starting pipewire-pulse didn't work, exiting"
+      exit 1
+    fi
+  fi
 
 	notify-send -a "Started recording" "$name"
 
-	echo $! > $TMPDIR/record
+	echo $ptpid > $TMPDIR/record
 	echo "$name" > $TMPDIR/record_name
 fi
 

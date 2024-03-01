@@ -29,6 +29,8 @@ else
 	[[ ${#coord[@]} = 0 ]] && exit 1
 
 	name="$HOME/Drive/Media/Recordings/$(date +'%F:%R:%S').mp4"
+	notify-send -a "Recording" "$name"
+  # XXX: -r 30fps? 60fps?
 	ffmpeg -nostdin -y -f pulse -ac 2 -i default -f x11grab -s ${coord[2]}x${coord[3]} -r 30 -i :0.0+${coord[0]},${coord[1]} -strict 2 -acodec aac -ab 128k -vcodec libx264 -pix_fmt yuv420p -profile:v baseline -level 3 "$name" > $TMPDIR/ffmpeg_out 2>&1 & disown
 
 	echo $! > $TMPDIR/record

@@ -15,10 +15,8 @@ source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
 alias pkexec='pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY'
 source ~/.bashrc
 
-if [ -e /home/ym/.nix-profile/etc/profile.d/nix.sh ]; then . /home/ym/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
+# if [ -e /home/ym/.nix-profile/etc/profile.d/nix.sh ]; then . /home/ym/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
 
-export GUIX_PROFILE="/home/ym/.config/guix/current"
-. "$GUIX_PROFILE/etc/profile"
-export PATH="$PATH:/home/ym/.config/guix/current/bin"
-
-# TORCH=1 pytest test/external/external_test_onnx_backend.py
+# export GUIX_PROFILE="/home/ym/.config/guix/current"
+# . "$GUIX_PROFILE/etc/profile"
+# export PATH="$PATH:/home/ym/.config/guix/current/bin"

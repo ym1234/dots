@@ -9,6 +9,7 @@ rules=(
 "mpv state=floating"
 "Zathura state=tiled"
 "retroarch state=floating"
+"matplotlib state=floating"
 '*:*:Picture-in-Picture state=floating'
 )
 

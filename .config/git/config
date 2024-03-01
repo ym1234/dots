@@ -16,3 +16,7 @@
 	ui = true
 [init]
 	defaultBranch = master
+[column]
+	ui = auto
+[branch]
+	sort = -committerdate

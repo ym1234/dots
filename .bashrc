@@ -1,6 +1,8 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
-PS1="\[\033[01;31m\]\h \[\033[0m\]:: \[\033[00;34m\]\W \[\033[0m\]= "
+
+PROMPT_COMMAND='history -a;\
+PS1="\[\033[01;31m\]\h \[\033[0m\]:: \[\033[00;34m\]\W \[\033[0m\]= "'
 
 export GOPATH="/home/ym/Drive/Projects/Go/"
 export CARGO_HOME="$HOME/.local/share/cargo"
@@ -27,7 +29,7 @@ export FZF_DEFAULT_OPTS="--inline-info --preview='~/bin/preview.sh {}' --bind '?
 export LESSHISTFILE=-
 export WEECHAT_HOME="~/.config/weechat/"
 export _JAVA_AWT_WM_NONREPARENTING=1
-export DRI_PRIME=0
+#export DRI_PRIME=0
 alias pkexec='pkexec env HOME=/home/ym/ DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY'
 
 shopt -s globstar extglob

@@ -85,21 +85,37 @@ local function create_clip(s, e)
 	local source = mp.get_property('path')
 	local aid = mp.get_property('aid')
 	local sid = mp.get_property('sid')
+	local ssid = mp.get_property('secondary-sid')
+  local audio_source = ''
+  local sub_source = ''
+  local secondary_source = ''
 
-	-- See the TODO above
-	-- local tracks_count = mp.get_property_number('track-list/count')
-	-- for i = 1, tracks_count do
-	-- 	local track_type = mp.get_property(string.format('track-list/%d/type', i))
-	-- 	local track_selected = mp.get_property(string.format('track-list/%d/selected', i))
-	-- 	if track_type == 'audio' and track_selected == 'yes' then
-	-- 		local o = {}
-	-- 		if mp.get_property(string.format('track-list/%d/external-filename', i), o) ~= o then
-	-- 			source = mp.get_property(string.format('track-list/%d/external-filename', i))
-	-- 			aid = 'auto'
-	-- 		end
-	-- 		break
-	-- 	end
-	-- end
+  -- This isn't true in all cases but works well enough
+  local tracks_count = mp.get_property_number('track-list/count')
+  for i = 1, tracks_count do
+    local track_type = mp.get_property(string.format('track-list/%d/type', i))
+    local track_selected = mp.get_property(string.format('track-list/%d/selected', i))
+    if track_type == 'audio' and track_selected == 'yes' then
+      local o = {}
+      if mp.get_property(string.format('track-list/%d/external-filename', i), o) ~= o then
+        audio_source = mp.get_property(string.format('track-list/%d/external-filename', i))
+      end
+    end
+    if track_type == 'sub' then
+      local o = {}
+      if mp.get_property(string.format('track-list/%d/external-filename', i), o) ~= o then
+        mainselection = mp.get_property(string.format('track-list/%d/main-selection', i))
+        ssource = mp.get_property(string.format('track-list/%d/external-filename', i))
+        if mainselection == 0 then
+          sub_source = ssource
+          sid = mp.get_property(string.format('track-list/%d/id', i))
+        else
+          secondary_source = ssource
+          ssid = mp.get_property(string.format('track-list/%d/id', i))
+        end
+      end
+    end
+  end
 
 	-- Clips don't need padding
 	-- s = s - AUDIO_CLIP_PADDING
@@ -109,17 +125,35 @@ local function create_clip(s, e)
 	end
 	local t = e - s
 
+  msg.info(sid)
+  msg.info(ssid)
+  msg.info(sub_source)
+  msg.info(secondary_source)
+
 	local cmd = {
 		'run',
 		'mpv',
 		source,
 		'--loop-file=no',
-		string.format('--aid=%s', aid),
-		string.format('--sid=%s', sid),
-		string.format('--start=%.3f', s),
-		string.format('--length=%.3f', t),
-		string.format('-o=%s', CLIP_FOLDER .. name)
-	}
+  }
+
+  if audio_source ~= '' then
+    table.insert(cmd, string.format('--audio-file=%s', audio_source))
+  end
+  if sub_source ~= '' then
+    table.insert(cmd, string.format('--sub-file=%s', sub_source))
+  end
+  if secondary_source ~= '' then
+    table.insert(cmd, string.format('--sub-file=%s', secondary_source))
+  end
+  table.insert(cmd, string.format('--aid=%s', aid))
+	table.insert(cmd, string.format('--sid=%s', sid))
+  if secondary_source ~= '' then
+    table.insert(cmd, string.format('--secondary-sid=%s', ssid))
+  end
+	table.insert(cmd, string.format('--start=%.3f', s))
+	table.insert(cmd, string.format('--length=%.3f', t))
+	table.insert(cmd, string.format('-o=%s', CLIP_FOLDER .. name))
 	mp.commandv(table.unpack(cmd))
 	return name
 end
