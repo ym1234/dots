@@ -12,11 +12,11 @@ export WINEPREFIX="$HOME/Drive2/.wine32"
 
 export DISABLE_QT5_COMPAT=1
 export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
-export XDG_DESKTOP_DIR="/tmp"
-export _Z_DATA="$HOME/.config/fasd/database"
-export _ZL_DATA="$HOME/.config/fasd/database"
-export _FASD_DATA="$HOME/.config/fasd/database"
-export _FASD_MAX=10000
+# export XDG_DESKTOP_DIR="/tmp"
+# export _Z_DATA="$HOME/.config/fasd/database"
+# export _ZL_DATA="$HOME/.config/fasd/database"
+# export _FASD_DATA="$HOME/.config/fasd/database"
+# export _FASD_MAX=10000
 export PATH="$PATH:$HOME/bin:$GOPATH/bin:$CARGO_HOME/bin:$HOME/.local/bin"
 export EDITOR='nvim'
 export VISUAL='nvim'
@@ -29,28 +29,16 @@ export FZF_DEFAULT_OPTS="--inline-info --preview='~/bin/preview.sh {}' --bind '?
 export LESSHISTFILE=-
 export WEECHAT_HOME="~/.config/weechat/"
 export _JAVA_AWT_WM_NONREPARENTING=1
-#export DRI_PRIME=0
 alias pkexec='pkexec env HOME=/home/ym/ DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY'
 
 shopt -s globstar extglob
 
 alias info='info --vi-keys'
 alias watch_vcd='mpv "-af=channelmap=1-0"'
-alias lorw='lorri watch > /tmp/lorri_out 2>&1 & '
-alias loli='tail -n 11 /tmp/lorri_out'
 alias cam='mpv -vf=hflip /dev/video0'
 
-# lol use lorri instead
-alias hsenv="nix-shell -p '(import <nixpkgs> {}).haskellPackages.ghcWithHoogle (pkgs: (pkgs.callPackage ./default.nix {}).buildInputs)'"
-alias c='cat'
 alias free='free -h'
-alias ncpamixer="ncpamixer --config=$HOME/.config/ncpamixer/ncpamixer.conf"
 alias ls='exa'
-alias lt='exa -T'
-alias ll='exa -l'
-alias llt='exa -lT'
-alias la='exa -la'
-alias lat='exa -lTa'
 
 alias ..="cd .."
 alias ...="cd ../../"
@@ -69,25 +57,13 @@ alias md='mkdir -p'
 alias ss='source ~/.bashrc'
 alias rd='rm -r'
 
-alias gi='git init'
-alias gs='git status'
 alias gl='git log --all --decorate --oneline --graph'
-alias ga='git add'
-alias gd='git diff'
-alias gc='git commit'
-alias gp='git push'
-alias gaa='git add -A'
-alias gup='gaa; gc; gp'
 
 alias pwndbg='gdb --eval="source /usr/share/pwndbg/gdbinit.py"'
 
 alias cfg='git --git-dir=$HOME/Documents/dots/ --work-tree=$HOME'
 alias orphan='sudo yay -Rncs $(yay -Qtdq)'
-alias py='python'
 
-alias o='a -e xdg-open'
-alias k="killall"
-alias less='less -r'
 alias mount='sudo mount'
 alias umount='sudo umount'
 alias fuckingwindows="find . -type f -execdir dos2unix {} \;"
@@ -99,12 +75,6 @@ recaudio() {
 	pacat --record -d "$sink.monitor" --file-format=wav "$1" > /dev/null 2>&1 & disown
 }
 
-export ytdf="res:360p,worst-audio"
-ytplay() {
-	[[ $2 ]] && config="${@:2}" || config="$ytdf"
-	ytdl  --filter="$config" -s -o - $1 | mpv --idle -
-}
-
 # TODO: use $@
 t() {
 	choice="$(fasd -l -r $1 | fzf --query="$1 " --select-1 --exit-0 --height=25% --reverse --tac --no-sort --cycle)"
@@ -112,38 +82,8 @@ t() {
 	[[ -d "$choice" ]] && cd "$choice" || rifle "$choice"
 }
 
-# TODO(ym): These sometimes misbehave, possibly due to the way they feed the arguments into other programs
-swallow() {
-	"$@" & disown && exit
-}
-
-spawn() {
-	"$@" & disown
-}
-
-rem() {
-	sudo pacman -Rcns $@
-}
-
-zathura() {
-	command zathura "$@" & disown
-}
-
-ff() {
-	find . -iname "$@"
-}
-
 links() {
 	ls $@ --color always | grep '\->'
-}
-
-mydunstify() {
-	# docs ig
-	appname="$1"
-	icon="$2"
-	summary="$3"
-	content="$4"
-	gdbus call -e -d "org.freedesktop.Notifications" -o /org/freedesktop/Notifications -m org.freedesktop.Notifications.Notify "$appname" 0 "$icon" "$summary" "$content" "[]" "{}" 5000
 }
 
 timer() {
@@ -226,8 +166,8 @@ fi
 for i in ~/Projects/fzf/shell/*.bash; do . "$i"; done
 # . /home/ym/.nix-profile/etc/profile.d/nix.sh # Sourced in .bash_profile too, maybe i should remove this?
 # eval "$(fasd --init auto)"
-eval "$(direnv hook bash)"
-[[ -r "/usr/share/z/z.sh" ]] && source /usr/share/z/z.sh
+# eval "$(direnv hook bash)"
+# [[ -r "/usr/share/z/z.sh" ]] && source /usr/share/z/z.sh
 # [[ -r "/usr/share/z.lua/z.lua" ]] && eval "$(luajit /usr/share/z.lua/z.lua --init bash enhanced once echo fzf)"
 # eval "$(zoxide init bash)"
 

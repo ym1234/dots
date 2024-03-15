@@ -30,9 +30,9 @@ frovo.py &
 python ~/fun/nhk_server/server.py &
 redshift &
 # while :; do mpc idle &> /dev/null; mpd_status &> /dev/null; done &
-aw-server-rust &
-aw-watcher-window &
-aw-watcher-afk &
+# aw-server-rust &
+# aw-watcher-window &
+# aw-watcher-afk &
 lxqt-policykit-agent &
 keepassxc &
 mpris-proxy &

@@ -6,8 +6,8 @@ if empty(glob('~/.config/nvim/plugins/'))
 	silent !curl -fLo ~/.config//nvim/autoload/plug.vim --create-dirs
 				\ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 	autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-
 endif
+
 let g:enable_italic_font = 1
 " TODO switch to tomorrow dark or something
 " Vim Plugins {{{
@@ -23,7 +23,7 @@ Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'branch': 'main', 'do': 'cmak
 
 	Plug 'lewis6991/gitsigns.nvim', {'branch': 'main'}
 
-	Plug 'ActivityWatch/aw-watcher-vim'
+	" Plug 'ActivityWatch/aw-watcher-vim'
 	Plug  'Vigemus/iron.nvim'
 	Plug  'qpkorr/vim-renamer'
 
