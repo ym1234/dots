@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+source /etc/os-release
+kernels=("linux" "linux-zen")
+cmdline="rw mitigations=off loglevel=3 acpi_enforce_resources=lax nowatchdog modprobe.blacklist=iTCO_wdt quiet splash libahci.ignore_sss=1"
+microcode="intel-ucode.img"
+tmpf=$(mktemp)
+blkid -o export "$(findmnt -r -n -o SOURCE /)" > tmpf
+source tmpf
+rm tmpf
+
+for i in "${kernels[@]}"; do
+  initramfs=initramfs-"$i".img
+  vmlinuz=vmlinuz-"$i"
+  mkdir -p /boot/EFI/"$ID-$i"
+  echo /boot/EFI/"$ID-$i"
+  cp /boot/$initramfs /boot/$vmlinuz /boot/EFI/"$ID-$i"/
+  cp /boot/$microcode /boot/EFI/"$ID-$i"/
+
+  echo $i
+  if [ ! -z "$i" ]; then
+    # Hard coded
+    efibootmgr --create --label "$ID-$i" --full-dev-path --loader "$ID-$i\\$vmlinuz" --unicode "root=PARTUUID=$PARTUUID rw initrd=$ID-$i\\$microcode initrd=$ID-$i\\$initramfs $cmdline"
+    # efibootmgr --create --disk /dev/nvme0n1 --part 1 --label "$ID-$i" --full-dev-path --loader "$ID-$i\\$vmlinuz" --unicode "root=PARTUUID=$PARTUUID rw initrd=$ID-$i\\$microcode initrd=$ID-$i\\$initramfs $cmdline"
+  fi
+done
