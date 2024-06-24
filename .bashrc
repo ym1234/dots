@@ -22,6 +22,7 @@ export EDITOR='nvim'
 export VISUAL='nvim'
 export MANPAGER='nvim +Man!'
 export RIPGREP_CONFIG_PATH="$HOME/.config/rg/config"
+export HISTSIZE=-1
 
 export FZF_DEFAULT_COMMAND="rg --no-pcre2-unicode --no-config --files --no-messages --no-ignore --hidden --follow -g '!{.git,.cache}'"
 # export FZF_DEFAULT_OPTS="--reverse --inline-info --preview='~/bin/preview.sh {}' --bind '?:toggle-preview' --tabstop=1 --ansi"
@@ -172,3 +173,5 @@ for i in ~/Projects/fzf/shell/*.bash; do . "$i"; done
 # eval "$(zoxide init bash)"
 
 [[ ! $DISPLAY && $XDG_VTNR == 1 ]] && exec startx &> /dev/null
+
+# source ~/.pyenvrc

@@ -35,7 +35,8 @@ Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'branch': 'main', 'do': 'cmak
 	" Idk if i really need it
     Plug 'tpope/vim-fugitive'
     Plug 'troydm/zoomwintab.vim'
-	Plug 'bogado/file-line'
+	" Plug 'bogado/file-line'
+    Plug 'wsdjeg/vim-fetch'
 
     Plug 'airblade/vim-rooter'
     " Plug 'chrisbra/Colorizer'
