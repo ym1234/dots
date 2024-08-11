@@ -7,6 +7,11 @@ case $1 in
 	*)
 		shotgun "$name" ;;
 esac
+upload=${2:-1}
 # curl -sF"file=@$name" https://c-v.sh | cut -d " " -f1 |  xclip -sel clipboard -in
-curl -sF"file=@$name" https://0x0.st |  xclip -sel clipboard -in
-notify-send -a "Screenshot: $name" "$(xclip -selection clipboard -out)"
+if [[ upload = 1 ]]; then
+  curl -sF"file=@$name" https://0x0.st |  xclip -sel clipboard -in
+  notify-send -a "Screenshot: $(basename $name)" "$(xclip -selection clipboard -out)"
+else
+  notify-send -a "Screenshot" "$(basename $name)"
+fi

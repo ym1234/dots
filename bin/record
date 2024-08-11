@@ -8,23 +8,31 @@ TMPDIR="${TMPDIR:-/tmp}"
 DIR="${DIR:-$HOME/Drive/Media/Recordings}"
 [[ ! -f $TMPDIR/record ]] && touch $TMPDIR/record
 pid="$(< $TMPDIR/record)"
+upload=${1:-1}
 if [[ -d /proc/"$pid/fd" ]]; then
 	name="$(< '/tmp/record_name')"
 
 	kill -s 2 "$pid"; sleep 0.5
-	notify-send -a "Recording: uploading clip" "$(basename $name)"
 
-	url=$(curl -sF"file=@$name" https://0x0.st)
-	[[ "$(wc -l <<< "$url")" -gt 1 ]] && notify-send -a "Recording: upload failed" "$name" && exit
+  msg1="Recording: finished recording"
+  msg2="$(basename $name)"
+  if [[ $upload = 1 ]]; then
+    notify-send -a "Recording: uploading clip" "$(basename $name)"
+    url=$(curl -sF"file=@$name" https://0x0.st)
+    [[ "$(wc -l <<< "$url")" -gt 1 ]] && notify-send -a "Recording: upload failed" "$name" && exit
 
-	xclip -selection clipboard -in <<< "$url"
-	notify-send -a "Recording: upload succeeded" "$url"
+    xclip -selection clipboard -in <<< "$url"
+    msg1="Recording: upload succeeded"
+    msg2="$url"
+  fi
+
+  notify-send -a "$msg1" "$msg2"
 else
 	readarray -t -d' ' coord <<< $(slop -q -f '%x %y %w %h') # XXX: don't quote, or you'll end up with a newline in the last array member
 	[[ ${#coord[@]} = 0 ]] && exit 1
 
 	name="$DIR/$(date +'%F:%R:%S').mp4"
-	notify-send -a "Recording" "$name"
+  notify-send -a "Recording" "$(basename $name)"
   # XXX: -r 30fps? 60fps?
   # -nostdin breaks the signal handling in ffmpeg or something
 	ffmpeg -y \
