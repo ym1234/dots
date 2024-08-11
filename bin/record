@@ -8,7 +8,7 @@ TMPDIR="${TMPDIR:-/tmp}"
 DIR="${DIR:-$HOME/Drive/Media/Recordings}"
 [[ ! -f $TMPDIR/record ]] && touch $TMPDIR/record
 pid="$(< $TMPDIR/record)"
-upload=${1:-1}
+upload=${1:-1} # getopts or something
 if [[ -d /proc/"$pid/fd" ]]; then
 	name="$(< '/tmp/record_name')"
 

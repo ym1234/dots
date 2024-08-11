@@ -7,7 +7,7 @@ case $1 in
 	*)
 		shotgun "$name" ;;
 esac
-upload=${2:-1}
+upload=${2:-1} # get opts
 # curl -sF"file=@$name" https://c-v.sh | cut -d " " -f1 |  xclip -sel clipboard -in
 if [[ upload = 1 ]]; then
   curl -sF"file=@$name" https://0x0.st |  xclip -sel clipboard -in
