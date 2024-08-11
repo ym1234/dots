@@ -1,15 +1,12 @@
 #!/bin/sh
-name="$HOME/Media/Screenshots/$(date +'%F:%R:%S').png"
-unset DRI_PRIME
+DIR="${DIR:-$HOME/Media/Screenshots}"
+name="$DIR/$(date +'%F:%R:%S').png"
 case $1 in
 	area)
-    # notify-send -a "Screenshot" "$name"
 		shotgun -g "$(slop 2> /dev/null)" "$name" ;;
 	*)
-    # notify-send -a "Screenshot (fullscreen)" "$name"
 		shotgun "$name" ;;
 esac
 # curl -sF"file=@$name" https://c-v.sh | cut -d " " -f1 |  xclip -sel clipboard -in
 curl -sF"file=@$name" https://0x0.st |  xclip -sel clipboard -in
 notify-send -a "Screenshot: $name" "$(xclip -selection clipboard -out)"
-# notify-send -a "Screenshot" "$name"

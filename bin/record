@@ -5,19 +5,14 @@
 #
 
 TMPDIR="${TMPDIR:-/tmp}"
+DIR="${DIR:-$HOME/Drive/Media/Recordings}"
 [[ ! -f $TMPDIR/record ]] && touch $TMPDIR/record
 pid="$(< $TMPDIR/record)"
 if [[ -d /proc/"$pid/fd" ]]; then
 	name="$(< '/tmp/record_name')"
 
-	kill -s 2 "$pid"
-	rm "$TMPDIR/record"
-	rm "$TMPDIR/record_name"
-	rm "$TMPDIR/ffmpeg_out"
+	kill -s 2 "$pid"; sleep 0.5
 	notify-send -a "Recording: uploading clip" "$(basename $name)"
-
-	# wait for ffmpeg to finish writing the file and exiting
-	sleep 0.5
 
 	url=$(curl -sF"file=@$name" https://0x0.st)
 	[[ "$(wc -l <<< "$url")" -gt 1 ]] && notify-send -a "Recording: upload failed" "$name" && exit
@@ -28,10 +23,16 @@ else
 	readarray -t -d' ' coord <<< $(slop -q -f '%x %y %w %h') # XXX: don't quote, or you'll end up with a newline in the last array member
 	[[ ${#coord[@]} = 0 ]] && exit 1
 
-	name="$HOME/Drive/Media/Recordings/$(date +'%F:%R:%S').mp4"
+	name="$DIR/$(date +'%F:%R:%S').mp4"
 	notify-send -a "Recording" "$name"
   # XXX: -r 30fps? 60fps?
-	ffmpeg -nostdin -y -f pulse -ac 2 -i default -f x11grab -s ${coord[2]}x${coord[3]} -r 30 -i :0.0+${coord[0]},${coord[1]} -strict 2 -acodec aac -ab 128k -vcodec libx264 -pix_fmt yuv420p -profile:v baseline -level 3 "$name" > $TMPDIR/ffmpeg_out 2>&1 & disown
+  # -nostdin breaks the signal handling in ffmpeg or something
+	ffmpeg -y \
+    -f x11grab -r 30 -s ${coord[2]}x${coord[3]} -i :0+${coord[0]},${coord[1]} \
+    -f pulse -ac 2 -i default \
+    -acodec aac -ab 128k \
+    -vcodec libx264 -pix_fmt yuv420p -profile:v baseline -r 30 \
+    -level 3 -strict 2 "$name" > $TMPDIR/ffmpeg_out 2>&1 & disown
 
 	echo $! > $TMPDIR/record
 	echo "$name" > $TMPDIR/record_name

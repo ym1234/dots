@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 source /etc/os-release
 kernels=("linux" "linux-zen")
-cmdline="rw mitigations=off sysrq_always_enabled=1 loglevel=3 acpi_enforce_resources=lax nowatchdog modprobe.blacklist=iTCO_wdt quiet splash libahci.ignore_sss=1 amdgpu.runpm=0"
+cmdline="rw mitigations=off sysrq_always_enabled=1 loglevel=3 acpi_enforce_resources=lax nowatchdog modprobe.blacklist=iTCO_wdt quiet splash libahci.ignore_sss=1 amdgpu.runpm=0 zswap.enabled=0"
 microcode="intel-ucode.img"
 tmpf=$(mktemp)
 blkid -o export "$(findmnt -r -n -o SOURCE /)" > tmpf

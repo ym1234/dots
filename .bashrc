@@ -32,6 +32,8 @@ export WEECHAT_HOME="~/.config/weechat/"
 export _JAVA_AWT_WM_NONREPARENTING=1
 alias pkexec='pkexec env HOME=/home/ym/ DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY'
 
+# Just don't kill your ssh-agent dumbass
+source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
 shopt -s globstar extglob
 
 alias info='info --vi-keys'
