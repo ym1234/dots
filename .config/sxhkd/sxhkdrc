@@ -22,12 +22,12 @@ alt + XF86AudioMute
 super + Return
 	st
 
-super + alt + g
-	~/Projects/bspwm_layout/out.sh
+# super + alt + g
+# 	~/Projects/bspwm_layout/out.sh
 
 # Some of these cover the bindings below
-super + s; {t,b,v,m}
-	{dateandtime,battery_level,vol,mpd_status}
+super + s; {t,b,v}
+	{dateandtime,battery_level,vol}
 
 # TODO(ym): Fix these
 # Or use rofi/dmenu/bmenu
@@ -64,9 +64,11 @@ super + s; f
 super + s; {m,x,s,z}
 	bspc node -g {marked,locked,sticky,private}
 
-super + {_,alt} {h,j,k,l}
-	{bspwm_focus,bspwm_move} {west,south,north,east}
+# super + {_,alt} {h,j,k,l}
+# 	{bspwm_focus,bspwm_move} {west,south,north,east}
 # move {-f,-s} {west,south,north,east}
+super + {_,alt} {h,j,k,l}
+	bspc node {-f,-s} {west,south,north,east}
 
 super + s; {p,a,comma,period}
 	bspc node -f @{parent,brother,first,second}
@@ -101,6 +103,6 @@ super + s; {1-9}
 super + s; r: {h,j,k,l}
 	bspwm_resize {west,south,north,east}
 
-super + {Left,Down,Up,Right}
-	bspc node -v {-20 0,0 20,0 -20,20 0}
+# super + {Left,Down,Up,Right}
+# 	bspc node -v {-20 0,0 20,0 -20,20 0}
 
